@@ -116,6 +116,19 @@ int k=0;
 if (aliasFile!=NULL)
  k = aliasbiar(dastoorat,aliasFile,addastoorat);    
 
+// fclose(aliasFile);
+if (k==1)
+return;
+  FILE* aliasFile1=fopen("/mnt/e/desktop/daneshgah/my daneshgah/proje/global/alias.txt","r");
+if (aliasFile1==NULL)
+{
+    
+    return;
+}
+k = aliasbiar(dastoorat,aliasFile1,addastoorat);
+
+// fclose(aliasFile1);
+
 
 }
 
@@ -123,15 +136,23 @@ int aliasbiar(char ** dastoorat,FILE* aliasFile,char***addastoorat){
     char aliasName[100];    
         char c;
     int k =0;
+    int m=0;
     fscanf(aliasFile,"%s",aliasName);
     while (aliasName[0]!=EOF)
-    {    
+    {    m++;
         if(strcmp(dastoorat[1],aliasName)==0){
         k=1;
         break;
         }
-    while (c !='\n')
+    while (c !='\n'){
     c =fgetc(aliasFile);
+    if(c==EOF)
+    break;
+    if(m==1000)
+    break;
+    }
+    if(m==1000)
+    break;
     fscanf(aliasFile,"%s",aliasName);
     }
   char** aldastoorat;
