@@ -178,9 +178,19 @@ int aliasbiar(char ** dastoorat,FILE* aliasFile,char***addastoorat){
 //tah alias ==========================================================================
 void init(char **dastoorat, int tedad_kalame)
 {
+    char chek[100];
+    strcpy(chek,dotGitYab());
+    if (strcmp(chek,"?")!=0)
+    {
+        printf("there is already a .git directory here or in upper directories \n");
+        return;
+    }
+    
     system("mkdir .gitman");
+    printf("Initialized empty Git repository ");
     FILE *avalesh = fopen(".gitman/config.txt", "w");
     fprintf(avalesh, "#");
+    printf("\n");
 }
 
 char *dotGitYab()
