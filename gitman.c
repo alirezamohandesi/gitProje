@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <dirent.h>
+#include <sys/stat.h>
+
+#define ADDRRES_GLOBAL /mnt/f/my daneshgah/proje/global
 void alias(char **dastoorat, int tedad_kalame);
 char *dotGitYab();
 
@@ -17,9 +21,9 @@ void configor(char **dastoorat, int tedad_kalame)
     if (strcmp("--global", dastoorat[2]) == 0)
     {
         FILE *hoviat;
-        hoviat = fopen("/mnt/e/desktop/daneshgah/my daneshgah/proje/global/name.txt", "r");
+        hoviat = fopen("/mnt/f/my daneshgah/proje/global/name.txt", "r");
         if (hoviat == NULL)
-            hoviat = fopen("/mnt/e/desktop/daneshgah/my daneshgah/proje/global/name.txt", "w+");
+            hoviat = fopen("/mnt/f/my daneshgah/proje/global/name.txt", "w+");
 
         char name[30] = "";
         char email[30] = "";
@@ -29,7 +33,7 @@ void configor(char **dastoorat, int tedad_kalame)
         if (strcmp("user.email", dastoorat[3]) == 0)
             strcpy(email, dastoorat[4]);
         fclose(hoviat);
-        hoviat = fopen("/mnt/e/desktop/daneshgah/my daneshgah/proje/global/name.txt", "w");
+        hoviat = fopen("/mnt/f/my daneshgah/proje/global/name.txt", "w");
         fprintf(hoviat, "name:%s\nemail:%s\n", name, email);
         printf("%s\n%s", name, email);
         fclose(hoviat);
@@ -80,7 +84,7 @@ void alias(char **dastoorat, int tedad_kalame)
     }
     else if (strcmp(dastoorat[2], "--global") == 0)
     {
-        FILE *aliasgol = fopen("/mnt/e/desktop/daneshgah/my daneshgah/proje/global/alias.txt", "a");
+        FILE *aliasgol = fopen("/mnt/f/my daneshgah/proje/global/alias.txt", "a");
         aliaschap(dastoorat, tedad_kalame, 1, aliasgol);
         fclose(aliasgol);
     }
@@ -119,7 +123,7 @@ if (aliasFile!=NULL)
 // fclose(aliasFile);
 if (k==1)
 return;
-  FILE* aliasFile1=fopen("/mnt/e/desktop/daneshgah/my daneshgah/proje/global/alias.txt","r");
+  FILE* aliasFile1=fopen("/mnt/f/my daneshgah/proje/global/alias.txt","r");
 if (aliasFile1==NULL)
 {
     
@@ -188,11 +192,100 @@ void init(char **dastoorat, int tedad_kalame)
     
     system("mkdir .gitman");
     printf("Initialized empty Git repository ");
+    system("mkdir -p .gitman/staged");
     FILE *avalesh = fopen(".gitman/config.txt", "w");
     fprintf(avalesh, "#");
     printf("\n");
 }
+//addha =============================================================
+ void copyCon( char** dastoorat,int tedad_kalame,char* addres);
+void dirpakCon(char** dastoorat,int tedad_kalame,char* addres);
+void add(char** dastoorat,int tedad_kalame){
+    char addres[100];
+    int wildcart_aya=0 ;
+    for (int i = 0; i < strlen(dastoorat[2]); i++)
+    {
+        if(dastoorat[2][i]=='*')
+        wildcart_aya=1;
+    }
+    if (strcmp(dotGitYab(),"?")==0)
+    {
+        printf("fatal: not in a gitman directory\n");
+            return;
+    }
+    strcpy(addres,dotGitYab());
+    strcat(addres,"/staged");
+if (strcmp("-f", dastoorat[2]) == 0)
+{
+    /* code */
+}
+else if (strcmp("-n", dastoorat[2]) == 0)
+{
+    /* code */
+}
+else if (wildcart_aya==1)
+{
+    /* code */
+}
+ 
+  copyCon( dastoorat, tedad_kalame,addres);
 
+}
+void copyCon(char** dastoorat,int tedad_kalame,char* addres){
+ FILE* bash = fopen("bash.sh","w");
+ fprintf(bash,"#!/bin/bash\ncp -r %s %s ",dastoorat[2],addres);
+ fclose(bash);
+ system("./bash.sh");
+ system("rm bash.sh");
+ dirpakCon( dastoorat, tedad_kalame, addres);
+}
+
+void dirpakCon(char** dastoorat,int tedad_kalame,char* addres){
+char direntrry[20][20];
+    DIR *dir;
+        int basgashtaya=0;
+    struct dirent *entry;
+    dir = opendir(addres);
+    struct stat st;
+    
+    if (dir == NULL) {
+        perror("opendir error");
+        return ;
+    }
+    int j=0;
+    while ((entry = readdir(dir)) != NULL) {
+        strcpy(direntrry[j],entry->d_name);
+        j++;
+    }
+
+    for (int i = 0; i < j; i++)
+    {
+         if (strcmp(direntrry[i], ".") == 0 || strcmp(direntrry[i], "..") == 0) {
+            continue;
+        }
+        char addres2[100];
+        strcpy(addres2,addres);
+        strcat(addres2,"/");
+        strcat(addres2,direntrry[i]);
+        stat(addres2,&st);
+       if( S_ISDIR(st.st_mode)){
+        basgashtaya=1;
+strcat(addres2,"/*");
+        FILE* bash = fopen("bash.sh","w");
+ fprintf(bash,"#!/bin/bash\ncp -r %s %s \nrm -r %s/%s",addres2,addres,addres,direntrry[i]);
+ fclose(bash);
+ system("./bash.sh");
+ system("rm bash.sh");
+ 
+       }
+    }
+    closedir(dir);
+    if(basgashtaya)
+    dirpakCon(dastoorat, tedad_kalame, addres);
+    return;
+}
+
+//========================================================================
 char *dotGitYab()
 {
     char *addres = malloc(100);
@@ -217,6 +310,7 @@ int main(int tedad_kalame, char **dastoorat)
         configor(dastoorat, tedad_kalame);
     if (strcmp("init", dastoorat[1]) == 0)
         init(dastoorat, tedad_kalame);
-
+    if (strcmp("add", dastoorat[1]) == 0)
+    add(dastoorat, tedad_kalame);
     return 0;
 }
