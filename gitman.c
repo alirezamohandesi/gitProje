@@ -8,6 +8,7 @@
 #define ADDRRES_GLOBAL /mnt/f/my daneshgah/proje/global
 void alias(char **dastoorat, int tedad_kalame);
 char *dotGitYab();
+int wildkart(char* dastoor2,int tedWildcart,char direntrry[20][20],int j,int shdorosta[20]);
 
 //==========================================================================================
 void configor(char **dastoorat, int tedad_kalame)
@@ -202,12 +203,13 @@ void init(char **dastoorat, int tedad_kalame)
 void dirpakCon(char** dastoorat,int tedad_kalame,char* addres);
 void add(char** dastoorat,int tedad_kalame){
     char addres[100];
-    int wildcart_aya=0 ;
+    int tedWildcart=0 ;
     for (int i = 0; i < strlen(dastoorat[2]); i++)
     {
         if(dastoorat[2][i]=='*')
-        wildcart_aya=1;
+        tedWildcart++;
     }
+    printf("%d\n%s",tedWildcart,dastoorat[2]);
     if (strcmp(dotGitYab(),"?")==0)
     {
         printf("fatal: not in a gitman directory\n");
@@ -217,21 +219,56 @@ void add(char** dastoorat,int tedad_kalame){
     strcat(addres,"/staged");
 if (strcmp("-f", dastoorat[2]) == 0)
 {
-    /* code */
+    for (int i = 0; i < tedad_kalame-3; i++)
+    {
+        strcpy(dastoorat[2],dastoorat[3+i]);
+        copyCon( dastoorat, tedad_kalame,addres);
+    }
+    
 }
 else if (strcmp("-n", dastoorat[2]) == 0)
 {
     /* code */
 }
-else if (wildcart_aya==1)
+else if (tedWildcart)
 {
-    /* code */
+    //esm entry dakhel folder==============================
+    char direntrry[20][20];
+    DIR *dir;
+    char cwd[PATH_MAX];
+    getcwd(cwd, sizeof(cwd));
+    struct dirent *entry;
+    dir = opendir(cwd);
+    int j=0;
+    while ((entry = readdir(dir)) != NULL) {
+        strcpy(direntrry[j],entry->d_name);
+        j++;
+    }
+        closedir(dir);
+int shDorosta[20];
+   int o = wildkart( dastoorat[2], tedWildcart, direntrry, j,shDorosta);
+    for (int i = 0; i < o; i++)
+    {
+        strcpy(dastoorat[2],direntrry[shDorosta[i]]);
+        copyCon( dastoorat, tedad_kalame,addres);
+    }
+    
 }
+
  
+else
   copyCon( dastoorat, tedad_kalame,addres);
 
+
 }
+
 void copyCon(char** dastoorat,int tedad_kalame,char* addres){
+char address2[100];
+strcpy(address2,dotGitYab());
+strcat(address2,"/addha.txt");
+    FILE* addha=fopen(address2,"a+");
+    fprintf(addha,"%s\n",dastoorat[2]);
+    fclose(addha);
  FILE* bash = fopen("bash.sh","w");
  fprintf(bash,"#!/bin/bash\ncp -r %s %s ",dastoorat[2],addres);
  fclose(bash);
@@ -263,6 +300,12 @@ char direntrry[20][20];
          if (strcmp(direntrry[i], ".") == 0 || strcmp(direntrry[i], "..") == 0) {
             continue;
         }
+        char address2[100];
+strcpy(address2,dotGitYab());
+strcat(address2,"/addha.txt");
+    FILE* addha=fopen(address2,"a+");
+    fprintf(addha,"%s\n",direntrry[i]);
+    fclose(addha);
         char addres2[100];
         strcpy(addres2,addres);
         strcat(addres2,"/");
@@ -285,7 +328,7 @@ strcat(addres2,"/*");
     return;
 }
 
-//========================================================================
+//omoomy portekrar===================================================================
 char *dotGitYab()
 {
     char *addres = malloc(100);
@@ -302,10 +345,68 @@ char *dotGitYab()
     return "?";
 }
 
+int wildkart(char* dastoor2,int tedWildcart,char direntrry[20][20],int j,int shdorosta[20]){
+    
+    char tekeha[tedWildcart+1][10];
+    int k =0;
+    int o=0;
+    char zapas[20];
+    strcpy(zapas,dastoor2);
+    const char s[2] = "*";
+   char *token;
+   token = strtok(zapas, s);
+   
+   while( token != NULL ) {
+strcpy(tekeha[k],token) ; 
+k++;  
+      token = strtok(NULL, s);
+   }
+//=======================================
+    for (int i = 0; i < j; i++)
+    {
+        int r=0;
+        char* c;
+        int parcham =0;
+        if(dastoor2[0]!='*'){
+    if(strncmp(tekeha[0],direntrry[i],strlen(tekeha[0]))!=0){
+    continue;
+    }
+}
+if(dastoor2[strlen(dastoor2)-1]!='*'){
+    if (strcmp(tekeha[k-1],direntrry[i]+strlen(direntrry[i])-strlen(tekeha[k-1]))!=0)
+    continue;
+    
+}
+
+        for (int m = 0; m < k; m++)
+        {
+            parcham =0;
+            if ((c=strstr(direntrry[i]+r,tekeha[m]))!=NULL)
+            {
+                 
+                r=(int)(c-direntrry[i]);
+                r+=strlen(tekeha[m]);
+            }
+            else {
+            parcham =1;
+            break;
+            }
+            
+        }
+        if(parcham==0){
+shdorosta[o]=i;
+o++;
+        printf("%s",direntrry[i]);
+        }
+        
+    }
+    return o;
+ }
+ //==========================================================================
 int main(int tedad_kalame, char **dastoorat)
 {
  aliasGir(tedad_kalame, dastoorat,&dastoorat);
- printf("%s",dastoorat[1]);
+//  printf("%s",dastoorat[1]);
     if (strcmp("config", dastoorat[1]) == 0)
         configor(dastoorat, tedad_kalame);
     if (strcmp("init", dastoorat[1]) == 0)
