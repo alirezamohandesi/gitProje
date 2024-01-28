@@ -202,6 +202,13 @@ void init(char **dastoorat, int tedad_kalame)
  void copyCon( char** dastoorat,int tedad_kalame,char* addres);
 void dirpakCon(char** dastoorat,int tedad_kalame,char* addres);
 void add(char** dastoorat,int tedad_kalame){
+    char addresaddha1[100];
+strcpy(addresaddha1,dotGitYab());
+    strcat(addresaddha1,"/addha.txt");
+FILE* addhaFile1=fopen(addresaddha1,"a");
+fprintf(addhaFile1,"@\n");
+
+
     char addres[100];
     int tedWildcart=0 ;
     for (int i = 0; i < strlen(dastoorat[2]); i++)
@@ -228,7 +235,72 @@ if (strcmp("-f", dastoorat[2]) == 0)
 }
 else if (strcmp("-n", dastoorat[2]) == 0)
 {
-    /* code */
+   char direntrry[20][20];
+    DIR *dir;
+    char cwd[PATH_MAX];
+    getcwd(cwd, sizeof(cwd));
+    struct dirent *entry;
+    dir = opendir(cwd);
+    int j=0;
+    while ((entry = readdir(dir)) != NULL) {
+        strcpy(direntrry[j],entry->d_name);
+        j++;
+    }
+        closedir(dir);
+
+    int shDorosta[20];  
+    char nextLine;
+  int l=0;
+  char c;
+char addresaddha[100];
+strcpy(addresaddha,dotGitYab());
+    strcat(addresaddha,"/addha.txt");
+    char addha[100];
+FILE* addhaFile=fopen(addresaddha,"r");
+for ( int i = 0; i < j; i++){
+    int parcham=0;
+    do
+    {
+        fscanf(addhaFile,"%s",addha);
+        c=fgetc(addhaFile);
+        if (strcmp(addha,direntrry[i])==0)
+        {
+            parcham=1;
+            break;
+        }
+        
+        
+    } while (c=='\n');
+    rewind(addhaFile);
+    if (parcham==1)
+        {
+
+shDorosta[l]=i;
+l++;
+        }
+    
+}
+fclose(addhaFile);
+int m=0;
+
+
+    for (int i = 0; i < j; i++)
+    {
+if (strcmp(direntrry[i], ".") == 0 || strcmp(direntrry[i], "..") == 0) 
+            continue;
+    printf("%s",direntrry[i]);
+    if ((i==shDorosta[m])&&(m!=l))
+    {
+       printf(" :st\n") ;
+       m++;
+    }
+    else
+    printf(" :un\n");
+    
+    
+}
+
+    return ;
 }
 else if (tedWildcart)
 {
@@ -258,7 +330,7 @@ int shDorosta[20];
  
 else
   copyCon( dastoorat, tedad_kalame,addres);
-
+fclose(addhaFile1);
 
 }
 
@@ -266,7 +338,7 @@ void copyCon(char** dastoorat,int tedad_kalame,char* addres){
 char address2[100];
 strcpy(address2,dotGitYab());
 strcat(address2,"/addha.txt");
-    FILE* addha=fopen(address2,"a+");
+    FILE* addha=fopen(address2,"a");
     fprintf(addha,"%s\n",dastoorat[2]);
     fclose(addha);
  FILE* bash = fopen("bash.sh","w");
@@ -303,15 +375,25 @@ char direntrry[20][20];
         char address2[100];
 strcpy(address2,dotGitYab());
 strcat(address2,"/addha.txt");
-    FILE* addha=fopen(address2,"a+");
-    fprintf(addha,"%s\n",direntrry[i]);
-    fclose(addha);
         char addres2[100];
         strcpy(addres2,addres);
         strcat(addres2,"/");
         strcat(addres2,direntrry[i]);
         stat(addres2,&st);
        if( S_ISDIR(st.st_mode)){
+        //==
+    DIR *dir1;
+    struct dirent *entry1;
+    dir1 = opendir(addres2);
+    
+    while ((entry1 = readdir(dir1)) != NULL) {
+        FILE* addha=fopen(address2,"a");
+        if (strcmp(entry1->d_name, ".") == 0 || strcmp(entry1->d_name, "..") == 0) 
+            continue;
+    fprintf(addha,"%s\n",entry1->d_name);
+    fclose(addha);
+    }
+        //==
         basgashtaya=1;
 strcat(addres2,"/*");
         FILE* bash = fopen("bash.sh","w");
@@ -326,6 +408,216 @@ strcat(addres2,"/*");
     if(basgashtaya)
     dirpakCon(dastoorat, tedad_kalame, addres);
     return;
+}
+//tah addha===================================================
+void resetcon(char* dastoor2,char addres[100],char dastoor2j[100]);
+void undoreset(char addres[100]);
+void file_addha_reset(char addres[100],char name[100]);
+void file_addha_reset_undo(char addres[100],int tedkaj);
+void reset(char** dastoorat,int tedad_kalame){
+    char addres[100];
+    int tedWildcart=0 ;
+    for (int i = 0; i < strlen(dastoorat[2]); i++)
+    {
+        if(dastoorat[2][i]=='*')
+        tedWildcart++;
+    }
+    printf("%d\n%s",tedWildcart,dastoorat[2]);
+    if (strcmp(dotGitYab(),"?")==0)
+    {
+        printf("fatal: not in a gitman directory\n");
+            return;
+    }
+    strcpy(addres,dotGitYab());
+    strcat(addres,"/staged");
+if (strcmp("-f", dastoorat[2]) == 0)
+{
+    for (int i = 0; i < tedad_kalame-3; i++)
+    {
+        strcpy(dastoorat[2],dastoorat[3+i]);
+        resetcon( dastoorat[2],addres,dastoorat[2]);
+    }
+    
+}
+else if (tedWildcart)
+{
+    //esm entry dakhel folder==============================
+    char direntrry[20][20];
+    DIR *dir;
+    char cwd[PATH_MAX];
+    getcwd(cwd, sizeof(cwd));
+    struct dirent *entry;
+    dir = opendir(cwd);
+    int j=0;
+    while ((entry = readdir(dir)) != NULL) {
+        strcpy(direntrry[j],entry->d_name);
+        j++;
+    }
+        closedir(dir);
+int shDorosta[20];
+   int o = wildkart( dastoorat[2], tedWildcart, direntrry, j,shDorosta);
+    for (int i = 0; i < o; i++)
+    {
+        strcpy(dastoorat[2],direntrry[shDorosta[i]]);
+        resetcon( dastoorat[2],addres,dastoorat[2]);
+    }
+    
+}
+else if (strcmp("-undo", dastoorat[2]) == 0)
+undoreset(addres);
+
+ 
+else
+  resetcon( dastoorat[2],addres,dastoorat[2]);
+}
+
+void undoreset(char addres[100]){
+    char addres2[100];
+    strcpy(addres2,dotGitYab());
+    strcat(addres2,"/addha.txt");
+    FILE* addhaFile =fopen(addres2,"r");
+    int tedkaj=0;
+    char c;
+    do
+    {
+        c =fgetc(addhaFile);
+        if(c=='@')
+        tedkaj++;
+    } while (c!=EOF);
+    rewind(addhaFile);    
+    for (int i = 0; i < tedkaj-1;)
+    {
+        c =fgetc(addhaFile);
+        if(c=='@')
+        i++;
+    }
+    if(tedkaj!=1)
+    fgetc(addhaFile);
+    char resetiha[100];
+    do
+    {
+        fscanf(addhaFile,"%s",resetiha);
+        fgetc(addhaFile);
+        if(strcmp(resetiha,"@")!=0){
+    struct stat st;
+
+stat(resetiha,&st);
+// goh sag dorost nashod :eror bara dir ha
+    //    if(!( S_ISDIR(st.st_mode))){
+ FILE* bash = fopen("bash.sh","w");
+ fprintf(bash,"#!/bin/bash\nrm %s/%s ",addres,resetiha);
+ fclose(bash);
+ system("./bash.sh");
+ system("rm bash.sh");
+        // resetcon(resetiha,addres,resetiha);
+        
+    //    }
+        }
+    } while (strcmp(resetiha,"@")!=0);
+    strcpy(addres,dotGitYab());
+strcat(addres,"/addha.txt");
+    file_addha_reset_undo(addres,tedkaj);
+    fclose(addhaFile);
+}
+
+void file_addha_reset_undo(char addres[100],int tedkaj){
+char c;
+FILE* addhaFile =fopen(addres,"r");
+char addres2[100];
+strcpy(addres2,addres);
+strcat(addres2,"1");
+FILE* addhaFile1 =fopen(addres2,"w");
+    do
+    {
+        
+        c =fgetc(addhaFile);
+    } while (c!=EOF);
+
+     rewind(addhaFile);    
+    for (int i = 0; i < tedkaj-1;)
+    {
+        c =fgetc(addhaFile);
+        fprintf(addhaFile1,"%c",c);
+        if(c=='@')
+        i++;
+    }
+                    FILE* bash = fopen("bash.sh","w");
+ fprintf(bash,"#!/bin/bash\nrm -r %s\nmv %s %s",addres,addres2,addres);
+ fclose(bash);
+ system("./bash.sh");
+ system("rm bash.sh");
+ fclose(addhaFile1);
+ fclose(addhaFile);
+}
+
+void resetcon(char* dastoor2,char addres[100],char dastoor2j[100]){
+    char address2[100];
+    struct stat st;
+strcpy(address2,dotGitYab());
+strcat(address2,"/addha.txt");
+stat(dastoor2,&st);
+       file_addha_reset(address2,dastoor2j);
+       if(!( S_ISDIR(st.st_mode))){
+ FILE* bash = fopen("bash.sh","w");
+ fprintf(bash,"#!/bin/bash\nrm %s/%s ",addres,dastoor2j);
+ fclose(bash);
+ system("./bash.sh");
+ system("rm bash.sh");
+       }
+       else{
+        char direntrry[20][20];
+    DIR *dir;
+    struct dirent *entry;
+    dir = opendir(dastoor2);
+    while ((entry = readdir(dir)) != NULL) {
+        // strcpy(direntrry[j],entry->d_name);
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) 
+            continue;
+        char address3[100];
+        strcpy(address3,dastoor2);
+         strcat(address3,"/");
+        strcat(address3,entry->d_name);
+        resetcon(address3,addres,entry->d_name);
+    }
+        closedir(dir);
+       }
+}
+void file_addha_reset(char addres[100],char name[100]){
+    FILE* addha=fopen(addres,"r");
+    char c;
+    char addshode[100];
+    char addhajadid[100][100];
+    int i=0;
+    do
+    {
+        
+        fscanf(addha,"%s",addshode);
+        c=fgetc(addha);
+        // printf("%s ",dic);
+        if (strcmp(name,addshode)!=0)
+        {
+        strcpy(addhajadid[i],addshode);
+        i++;
+        }
+        
+        
+    } while (c=='\n');
+    fclose(addha);
+    char addres3[100];
+    strcpy(addres3,addres);
+    strcat(addres3,"1");
+   FILE* addha1=fopen(addres3,"a");
+    for (int j = 0; j < i; j++)
+{
+        fprintf(addha1,"%s\n",addhajadid[j]);
+        // printf("%s",addhajadid[j]);
+}
+        fclose(addha1);
+                FILE* bash = fopen("bash.sh","w");
+ fprintf(bash,"#!/bin/bash\nrm -r %s\nmv %s %s",addres,addres3,addres);
+ fclose(bash);
+ system("./bash.sh");
+ system("rm bash.sh");
 }
 
 //omoomy portekrar===================================================================
@@ -413,5 +705,7 @@ int main(int tedad_kalame, char **dastoorat)
         init(dastoorat, tedad_kalame);
     if (strcmp("add", dastoorat[1]) == 0)
     add(dastoorat, tedad_kalame);
+    if (strcmp("reset", dastoorat[1]) == 0)
+    reset(dastoorat, tedad_kalame);
     return 0;
 }
