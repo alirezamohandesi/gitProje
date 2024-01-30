@@ -4,11 +4,13 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #define ADDRRES_GLOBAL /mnt/f/my daneshgah/proje/global
 void alias(char **dastoorat, int tedad_kalame);
 char *dotGitYab();
 int wildkart(char* dastoor2,int tedWildcart,char direntrry[20][20],int j,int shdorosta[20]);
+int configyab(char name[30],char email[30]);
 
 //==========================================================================================
 void configor(char **dastoorat, int tedad_kalame)
@@ -80,17 +82,29 @@ void alias(char **dastoorat, int tedad_kalame)
 {
     if (strcmp(dastoorat[1], "config") != 0)
     {
-        printf("command not found");
+        printf("command not found\n");
         return;
     }
     else if (strcmp(dastoorat[2], "--global") == 0)
     {
+        if (strncmp(dastoorat[4],"gitman ",7)!=0)
+        {
+        printf("command not found\n");
+        return;
+        }
+        
         FILE *aliasgol = fopen("/mnt/f/my daneshgah/proje/global/alias.txt", "a");
         aliaschap(dastoorat, tedad_kalame, 1, aliasgol);
         fclose(aliasgol);
     }
     else
     {
+        if (strncmp(dastoorat[3],"gitman ",7)!=0)
+        {
+        printf("command not found");
+        return;
+        }
+
         char *addres = dotGitYab();
           if (strcmp(addres, "?") == 0){
          printf("fatal: not in a gitman directory\n");
@@ -194,13 +208,19 @@ void init(char **dastoorat, int tedad_kalame)
     system("mkdir .gitman");
     printf("Initialized empty Git repository ");
     system("mkdir -p .gitman/staged");
-    FILE *avalesh = fopen(".gitman/config.txt", "w");
+    system("mkdir -p .gitman/commitha");
+    FILE *avalesh = fopen(".gitman/commit_info.txt", "w");
     fprintf(avalesh, "#");
+    fclose(avalesh);
+     avalesh = fopen(".gitman/config.txt", "w");
+    fprintf(avalesh, "#");
+    fclose(avalesh);
     printf("\n");
 }
 //addha =============================================================
  void copyCon( char** dastoorat,int tedad_kalame,char* addres);
 void dirpakCon(char** dastoorat,int tedad_kalame,char* addres);
+void add_n();
 void add(char** dastoorat,int tedad_kalame){
     char addresaddha1[100];
 strcpy(addresaddha1,dotGitYab());
@@ -235,7 +255,43 @@ if (strcmp("-f", dastoorat[2]) == 0)
 }
 else if (strcmp("-n", dastoorat[2]) == 0)
 {
-   char direntrry[20][20];
+
+add_n();
+    return ;
+}
+else if (tedWildcart)
+{
+    //esm entry dakhel folder==============================
+    char direntrry[20][20];
+    DIR *dir;
+    char cwd[PATH_MAX];
+    getcwd(cwd, sizeof(cwd));
+    struct dirent *entry;
+    dir = opendir(cwd);
+    int j=0;
+    while ((entry = readdir(dir)) != NULL) {
+        strcpy(direntrry[j],entry->d_name);
+        j++;
+    }
+        closedir(dir);
+int shDorosta[20];
+   int o = wildkart( dastoorat[2], tedWildcart, direntrry, j,shDorosta);
+    for (int i = 0; i < o; i++)
+    {
+        strcpy(dastoorat[2],direntrry[shDorosta[i]]);
+        copyCon( dastoorat, tedad_kalame,addres);
+    }
+    
+}
+
+ 
+else
+  copyCon( dastoorat, tedad_kalame,addres);
+fclose(addhaFile1);
+
+}
+void add_n(){
+char direntrry[20][20];
     DIR *dir;
     char cwd[PATH_MAX];
     getcwd(cwd, sizeof(cwd));
@@ -301,37 +357,6 @@ if (strcmp(direntrry[i], ".") == 0 || strcmp(direntrry[i], "..") == 0)
 }
 
     return ;
-}
-else if (tedWildcart)
-{
-    //esm entry dakhel folder==============================
-    char direntrry[20][20];
-    DIR *dir;
-    char cwd[PATH_MAX];
-    getcwd(cwd, sizeof(cwd));
-    struct dirent *entry;
-    dir = opendir(cwd);
-    int j=0;
-    while ((entry = readdir(dir)) != NULL) {
-        strcpy(direntrry[j],entry->d_name);
-        j++;
-    }
-        closedir(dir);
-int shDorosta[20];
-   int o = wildkart( dastoorat[2], tedWildcart, direntrry, j,shDorosta);
-    for (int i = 0; i < o; i++)
-    {
-        strcpy(dastoorat[2],direntrry[shDorosta[i]]);
-        copyCon( dastoorat, tedad_kalame,addres);
-    }
-    
-}
-
- 
-else
-  copyCon( dastoorat, tedad_kalame,addres);
-fclose(addhaFile1);
-
 }
 
 void copyCon(char** dastoorat,int tedad_kalame,char* addres){
@@ -410,6 +435,7 @@ strcat(addres2,"/*");
     return;
 }
 //tah addha===================================================
+//resetha=========================================================
 void resetcon(char* dastoor2,char addres[100],char dastoor2j[100]);
 void undoreset(char addres[100]);
 void file_addha_reset(char addres[100],char name[100]);
@@ -619,7 +645,97 @@ void file_addha_reset(char addres[100],char name[100]){
  system("./bash.sh");
  system("rm bash.sh");
 }
+//tahresetha=========================================================
+//status==================================================================
+void status(char** dastoorat,int tedad_kalame){
+    //ba commitha chekshe
 
+}
+//tahstatus==================================================================
+//commitha==============================================================
+void commit(char** dastooorat,int tedad_kalame){
+char address_staged[100];
+char address_commit[100];
+char address_addha[100];
+strcpy(address_staged,dotGitYab());
+strcat(address_staged,"/staged");
+strcpy(address_commit,dotGitYab());
+strcat(address_commit,"/commitha");
+strcpy(address_addha,dotGitYab());
+strcat(address_addha,"/addha.txt");
+
+struct dirent* staged;
+  DIR *dirstag= opendir(address_staged);
+  int n=0;
+  char staged_entry[100][100];
+  char name[30];
+  char email[30];
+  int parcham =configyab(name,email);  
+
+  while ((staged=readdir(dirstag))!=NULL)
+  {
+    if (strcmp(staged->d_name, ".") == 0 || strcmp(staged->d_name, "..") == 0) 
+            continue;
+    strcpy(staged_entry[n],staged->d_name);
+    n++;
+  }
+   if (parcham==0)
+{
+    printf("please config\n");
+    return;
+}
+
+  else if (n<=0){
+    printf("sataged is empty\n");
+    return;
+  }
+  
+ else if (strcmp(dastooorat[2],"-m")!=0){
+    printf("command not found\n");
+    return;
+  }
+   else if (dastooorat[3]==NULL){
+    printf(" write a message for commit\n");
+    return;
+  }
+  else if (strlen(dastooorat[3])>72){
+    printf("the message contain more than 72 character\n");
+    return;
+  }
+
+time_t commit_time=time(NULL);
+char time[100];
+char address_commit_info[100];
+strcpy(address_commit_info,dotGitYab());
+strcat(address_commit_info,"/commit_info.txt");
+strcpy(time,ctime(&commit_time));
+time[strlen(time)-1]='"';
+FILE* com_info = fopen(address_commit_info,"a");
+  struct dirent* commitha;
+  DIR *dircommit= opendir(address_commit);
+  int m=0;
+  while ((commitha=readdir(dircommit))!=NULL)
+  {
+    if (strcmp(commitha->d_name, ".") == 0 || strcmp(commitha->d_name, "..") == 0) 
+            continue;
+    m++;
+  }
+fprintf(com_info,"payam: \"%s\"\ntime: \"%s\nname: %s\nemail: %s\nnumber of files: %d\nID: %d\n@\n",dastooorat[3],time,name,email,n,m+1);
+fclose(com_info);
+// brancham bezar
+  closedir(dircommit);
+  closedir(dirstag);
+  char command[500];
+  sprintf(command,"mkdir %s/commit%d",address_commit,m+1);
+//   printf("%s", command);
+    system(command);
+    sprintf(command,"mv %s/* %s/commit%d",address_staged,address_commit,m+1);
+    system(command);
+     FILE* a= fopen(address_addha,"w");
+    fclose(a);
+    
+}
+//tahcommitha==============================================================
 //omoomy portekrar===================================================================
 char *dotGitYab()
 {
@@ -635,6 +751,23 @@ char *dotGitYab()
         strcpy(addres, dot2);
     }
     return "?";
+}
+ int configyab(char name[30],char email[30]){
+char addres_conf[100];
+strcpy(addres_conf,dotGitYab());
+strcat(addres_conf,"/config.txt");
+FILE* config_file = fopen(addres_conf,"r");
+char c=fgetc(config_file);
+if(c=='#'||config_file==NULL)
+strcpy(addres_conf,"/mnt/f/my daneshgah/proje/global/name.txt");
+fclose(config_file);
+config_file =fopen(addres_conf,"r");
+c= fgetc(config_file);
+if(c=='#'||config_file==NULL)
+return 0;
+rewind(config_file);
+fscanf(config_file, "name:%s\nemail:%s\n", name, email);
+return 1;
 }
 
 int wildkart(char* dastoor2,int tedWildcart,char direntrry[20][20],int j,int shdorosta[20]){
@@ -701,11 +834,17 @@ int main(int tedad_kalame, char **dastoorat)
 //  printf("%s",dastoorat[1]);
     if (strcmp("config", dastoorat[1]) == 0)
         configor(dastoorat, tedad_kalame);
-    if (strcmp("init", dastoorat[1]) == 0)
+   else if (strcmp("init", dastoorat[1]) == 0)
         init(dastoorat, tedad_kalame);
-    if (strcmp("add", dastoorat[1]) == 0)
+   else if (strcmp("add", dastoorat[1]) == 0)
     add(dastoorat, tedad_kalame);
-    if (strcmp("reset", dastoorat[1]) == 0)
+   else if (strcmp("reset", dastoorat[1]) == 0)
     reset(dastoorat, tedad_kalame);
+   else if (strcmp("reset", dastoorat[1]) == 0)
+    reset(dastoorat, tedad_kalame);
+    else if (strcmp("status", dastoorat[1]) == 0)
+    status(dastoorat, tedad_kalame);
+    else if (strcmp("commit", dastoorat[1]) == 0)
+    commit(dastoorat, tedad_kalame);
     return 0;
 }
