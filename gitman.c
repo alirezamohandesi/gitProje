@@ -140,10 +140,7 @@ if (k==1)
 return;
   FILE* aliasFile1=fopen("/mnt/f/my daneshgah/proje/global/alias.txt","r");
 if (aliasFile1==NULL)
-{
-    
     return;
-}
 k = aliasbiar(dastoorat,aliasFile1,addastoorat);
 
 // fclose(aliasFile1);
@@ -689,13 +686,60 @@ struct dirent* staged;
     printf("sataged is empty\n");
     return;
   }
-  
+ else if (strcmp(dastooorat[2],"-s")==0){
+    char address_short[100];
+    strcpy(address_short,dotGitYab());
+    strcat(address_short,"/shortcut.txt");
+    FILE* short_file =fopen(address_short,"r");
+    if (short_file==NULL){
+        printf("shortcut doesn't exist");
+        return;
+    }
+
+ char shortname[100];    
+        char c;
+    int k =0;
+    int m=0;
+    fscanf(short_file,"%s",shortname);
+    while (shortname[0]!=EOF)
+    {    m++;
+        if(strcmp(dastooorat[3],shortname)==0){
+        k=1;
+        break;
+        }
+    while (c !='\n'){
+    c =fgetc(short_file);
+    if(c==EOF)
+    break;
+    if(m==1000)
+    break;
+    }
+    if(m==1000)
+    break;
+    fscanf(short_file,"%s",shortname);
+    }
+  char* aldastoorat =malloc(100);
+    if (k==1)
+{
+    
+    fscanf(short_file," : \"%[^\"]",aldastoorat);
+    fclose(short_file);
+    dastooorat[3]=aldastoorat;
+    strcpy(dastooorat[2],"-m");
+  }
+  else 
+          printf("shortcut doesn't exist");
+ }
  else if (strcmp(dastooorat[2],"-m")!=0){
     printf("command not found\n");
     return;
   }
    else if (dastooorat[3]==NULL){
     printf(" write a message for commit\n");
+    return;
+  }
+    else if (tedad_kalame!=4){
+    printf("command not found\n");
     return;
   }
   else if (strlen(dastooorat[3])>72){
@@ -734,6 +778,74 @@ fclose(com_info);
      FILE* a= fopen(address_addha,"w");
     fclose(a);
     
+}
+void set(char** dastooorat,int tedad_kalame){
+  if (strcmp(dastooorat[2],"-m")!=0){
+    printf("command not found\n");
+    return;
+  }
+   else if (strcmp(dastooorat[4],"-s")!=0){
+    printf("command not found\n");
+    return;
+  }
+  char address_short[100];
+  strcpy(address_short,dotGitYab());
+  strcat(address_short,"/shortcut.txt");
+  FILE* short_file=fopen(address_short,"a");
+  fprintf(short_file,"%s : \"%s\"\n",dastooorat[5],dastooorat[3]);
+  fclose(short_file);
+}
+
+void replace(char** dastooorat,int tedad_kalame,int rem_or_rep){
+   char old_address_short[100];
+    strcpy(old_address_short,dotGitYab());
+  strcat(old_address_short,"/shortcut.txt");
+FILE* old_short = fopen(old_address_short,"r");
+if (old_short==NULL)
+{
+printf("shortcut doesn't exist");
+        return;
+        }
+char new_address_short[150];
+    strcpy(new_address_short,dotGitYab());
+  strcat(new_address_short,"/shortcut1.txt");
+FILE* new_short = fopen(new_address_short,"w");
+char c;
+int n_newlin=0;
+while (c!=EOF)
+{
+    c=fgetc(old_short);
+    if(c=='\n')
+    n_newlin++;
+}
+rewind(old_short);
+char shortcut[100];
+for (int i = 0; i < n_newlin; i++)
+{
+    fgets(shortcut,99,old_short);
+    if((strncmp(dastooorat[5],shortcut,strlen(dastooorat[5]))==0)){
+        char shortcut_name[40];
+        char shortcut_mes[100];
+    sscanf(shortcut,"%s : %s",shortcut_name,shortcut_mes);
+    if (strlen(dastooorat[3])>72)
+    {
+     printf("the message contain more than 72 character\n");
+    return;
+    }
+    fprintf(new_short,"%s : \"%s\"\n",shortcut_name,dastooorat[3]);
+    continue;
+    }
+    if(strncmp(dastooorat[3],shortcut,strlen(dastooorat[3]))==0)
+    continue;
+    fprintf(new_short,"%s",shortcut);
+}
+char command[500];
+sprintf(command,"rm %s",old_address_short);
+system(command);
+sprintf(command,"mv %s %s",new_address_short,old_address_short);
+system(command);
+
+
 }
 //tahcommitha==============================================================
 //omoomy portekrar===================================================================
@@ -834,7 +946,7 @@ int main(int tedad_kalame, char **dastoorat)
 //  printf("%s",dastoorat[1]);
     if (strcmp("config", dastoorat[1]) == 0)
         configor(dastoorat, tedad_kalame);
-   else if (strcmp("init", dastoorat[1]) == 0)
+    if (strcmp("init", dastoorat[1]) == 0)
         init(dastoorat, tedad_kalame);
    else if (strcmp("add", dastoorat[1]) == 0)
     add(dastoorat, tedad_kalame);
@@ -846,5 +958,11 @@ int main(int tedad_kalame, char **dastoorat)
     status(dastoorat, tedad_kalame);
     else if (strcmp("commit", dastoorat[1]) == 0)
     commit(dastoorat, tedad_kalame);
+    else if (strcmp("set", dastoorat[1]) == 0)
+    set(dastoorat, tedad_kalame);
+    else if (strcmp("replace", dastoorat[1]) == 0)
+    replace(dastoorat, tedad_kalame,1);
+    else if (strcmp("remove", dastoorat[1]) == 0)
+    replace(dastoorat, tedad_kalame,0);
     return 0;
 }
