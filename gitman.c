@@ -764,7 +764,7 @@ FILE* com_info = fopen(address_commit_info,"a");
             continue;
     m++;
   }
-fprintf(com_info,"payam: \"%s\"\ntime: \"%s\nname: %s\nemail: %s\nnumber of files: %d\nID: %d\n@\n",dastooorat[3],time,name,email,n,m+1);
+fprintf(com_info,"payam: \"%s\"\ntime: \"%s\nname: %s\nemail: %s\nnumber of files: %d\nID: %d\nbranch: master\n@\n",dastooorat[3],time,name,email,n,m+1);
 fclose(com_info);
 // brancham bezar
   closedir(dircommit);
@@ -848,6 +848,173 @@ system(command);
 
 }
 //tahcommitha==============================================================
+//log ha ===============================================================
+  int austhor_yab(char* author,int n,int sh_commit_ok[n],FILE* cominfo_file);
+ void logcom(char** dastooorat,int tedad_kalame){
+char address_cominfo[100];
+strcpy(address_cominfo,dotGitYab());
+strcat(address_cominfo,"/commit_info.txt");
+FILE* cominfo_file =fopen(address_cominfo,"r");
+char c;
+int n=0;
+while (c!=EOF)
+{
+c=fgetc(cominfo_file);
+if(c=='@')
+n++;
+}
+int sh_commit_ok[n];
+long ted_com=n;
+if ((tedad_kalame==4)&&(strcmp(dastooorat[2],"-n")==0))
+{
+     ted_com=strtol(dastooorat[3],NULL,10);
+}
+else if ((tedad_kalame==4)&&(strcmp(dastooorat[2],"-author")==0))
+{
+ ted_com = austhor_yab(dastooorat[3],n,sh_commit_ok,cominfo_file);
+ if (ted_com==0)
+    printf("the author doesn't exist\n");
+    return;
+}
+else if ((tedad_kalame==4)&&(strcmp(dastooorat[2],"-branch")==0))
+{
+ ted_com = austhor_yab(dastooorat[3],n+1000,sh_commit_ok,cominfo_file);
+ if (ted_com==0)
+    printf("the branch doesn't exist\n");
+    return;
+}
+else if ((tedad_kalame>=4)&&(strcmp(dastooorat[2],"-search")==0))
+{
+ ted_com = austhor_yab(dastooorat[3],n+500,sh_commit_ok,cominfo_file);
+ if (ted_com==0)
+    printf("the word doesn't exist\n");
+    return;
+}
+rewind(cominfo_file);
+int k=0;
+for (int i = 0; i < ted_com; i++)
+{
+    while (k!=(n-i-1))
+    {
+    
+    c= fgetc(cominfo_file);
+    if(c=='@')
+     k++;
+    }
+    if (k==(n-i-1))
+    {
+        fgetc(cominfo_file);
+        char c2=' ';
+        while (c2!='@')
+        {
+            c2 =fgetc(cominfo_file);
+            printf("%c",c2);
+        }
+        printf("\n");
+        k=0;
+        rewind(cominfo_file);
+        continue;
+    }  
+}
+fclose(cominfo_file);
+}
+
+  int austhor_yab(char* author,int n,int sh_commit_ok[n],FILE* cominfo_file){
+    int ted=0;
+    int parcham=0;
+    if(n>=1000){
+parcham=1;
+    n-=1000;
+    }
+        if(n>=500){
+parcham=2;
+    n-=500;
+    }
+rewind(cominfo_file);
+char authorha[100];
+for (int i = 0; i < n; i++)
+{
+    char alak[200];
+    if(parcham==0){
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fscanf(cominfo_file,"name: %s\n",authorha);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+    }
+    else if(parcham==1){
+        fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fscanf(cominfo_file,"branch: %s\n",authorha);
+fgets(alak,199,cominfo_file);
+    }
+        else if(parcham==2){
+fscanf(cominfo_file,"payam: \"%[^\"]\"\n",authorha);
+        fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+    }
+    if(parcham!=2){
+    if (strcmp(author,authorha)==0)
+    {
+        ted++;
+        sh_commit_ok[ted]=i+1;
+    } 
+    }
+    else{
+        if (strstr(authorha,author)!=NULL)
+    {
+        ted++;
+        sh_commit_ok[ted]=i+1;
+    } 
+    }
+}
+char c;
+int k=0;
+int j=0;
+rewind(cominfo_file);
+for (int i = 0; i < n; i++)
+{
+    while (k!=(n-i-1))
+    {
+    c= fgetc(cominfo_file);
+    if(c=='@')
+     k++;
+    }
+    if (k==(n-i-1))
+    {
+        fgetc(cominfo_file);
+        char c2=' ';
+        if((n-i)==sh_commit_ok[ted-j]){
+        while (c2!='@')
+        {
+            c2 =fgetc(cominfo_file);
+            printf("%c",c2);
+        }
+        printf("\n");
+        j++;
+        if(j==ted)
+        return ted;
+        }
+        k=0;
+        rewind(cominfo_file);
+        continue;
+    }  
+}
+return ted;
+  }
+//tah log ha ===============================================================
 //omoomy portekrar===================================================================
 char *dotGitYab()
 {
@@ -964,5 +1131,7 @@ int main(int tedad_kalame, char **dastoorat)
     replace(dastoorat, tedad_kalame,1);
     else if (strcmp("remove", dastoorat[1]) == 0)
     replace(dastoorat, tedad_kalame,0);
+    else if (strcmp("log", dastoorat[1]) == 0)
+    logcom(dastoorat, tedad_kalame);
     return 0;
 }
