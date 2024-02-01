@@ -650,6 +650,8 @@ void status(char** dastoorat,int tedad_kalame){
 }
 //tahstatus==================================================================
 //commitha==============================================================
+void commit_ghabli_biar(int sh_commit);
+int file_yab(char* file_name);
 void commit(char** dastooorat,int tedad_kalame){
 char address_staged[100];
 char address_commit[100];
@@ -747,24 +749,32 @@ struct dirent* staged;
     return;
   }
 
-time_t commit_time=time(NULL);
-char time[100];
 char address_commit_info[100];
 strcpy(address_commit_info,dotGitYab());
 strcat(address_commit_info,"/commit_info.txt");
-strcpy(time,ctime(&commit_time));
-time[strlen(time)-1]='"';
 FILE* com_info = fopen(address_commit_info,"a");
   struct dirent* commitha;
   DIR *dircommit= opendir(address_commit);
   int m=0;
+    //=====
+    time_t rawtime;
+   struct tm *info;
+   char buffer[80];
+   time(&rawtime);
+
+   info = localtime( &rawtime );
+
+   strftime(buffer,80,"%Y/%m/%d %X", info);
+    //==========
+
   while ((commitha=readdir(dircommit))!=NULL)
   {
     if (strcmp(commitha->d_name, ".") == 0 || strcmp(commitha->d_name, "..") == 0) 
             continue;
     m++;
   }
-fprintf(com_info,"payam: \"%s\"\ntime: \"%s\nname: %s\nemail: %s\nnumber of files: %d\nID: %d\nbranch: master\n@\n",dastooorat[3],time,name,email,n,m+1);
+  
+fprintf(com_info,"payam: \"%s\"\ntime: \"%s\"\nname: %s\nemail: %s\nnumber of files: %d\nID: %d\nbranch: master\n@\n",dastooorat[3],buffer,name,email,n,m+1);
 fclose(com_info);
 // brancham bezar
   closedir(dircommit);
@@ -773,12 +783,67 @@ fclose(com_info);
   sprintf(command,"mkdir %s/commit%d",address_commit,m+1);
 //   printf("%s", command);
     system(command);
+  commit_ghabli_biar(m+1);
     sprintf(command,"mv %s/* %s/commit%d",address_staged,address_commit,m+1);
     system(command);
      FILE* a= fopen(address_addha,"w");
     fclose(a);
     
 }
+
+void commit_ghabli_biar(int sh_commit){
+if(sh_commit==1)
+return;
+char add_jadcom[100];
+char add_akhcom[100];
+strcpy(add_akhcom,dotGitYab());
+strcpy(add_jadcom,dotGitYab());
+char tahjad[25];
+sprintf(tahjad,"/commitha/commit%d",sh_commit);
+char tahakh[25];
+sprintf(tahakh,"/commitha/commit%d",sh_commit-1);
+strcat(add_jadcom,tahjad);
+strcat(add_akhcom,tahakh);
+DIR* akhcom;
+akhcom= opendir(add_akhcom);
+if(akhcom==NULL){
+printf("???");
+return ;
+}
+struct dirent* fileha_akhcom;
+while ((fileha_akhcom = readdir(akhcom)) != NULL) {
+        // strcpy(direntrry[j],entry->d_name);
+        if (strcmp(fileha_akhcom->d_name, ".") == 0 || strcmp(fileha_akhcom->d_name, "..") == 0) 
+            continue;
+       int vogood = file_yab(fileha_akhcom->d_name);
+       if(vogood==1){
+        char command[500];
+        sprintf(command,"cp %s/%s %s",add_akhcom,fileha_akhcom->d_name,add_jadcom);
+        system(command);
+       }
+    }
+}
+
+int file_yab(char *file_name){
+ char command[400];
+ sprintf(command,"find . -name %s >1.txt",file_name);
+ system(command);
+ FILE* javab = fopen("1.txt","r");
+ char c=' ';
+ char khat[200];
+ while (c!=EOF)
+ {
+   c= fgetc(javab);
+   if(c==EOF)
+   break;
+    fgets(khat,199,javab);
+if (strncmp(khat,"/.gitman",7)!=0)
+return 1;
+
+ }
+ return 0;
+}
+
 void set(char** dastooorat,int tedad_kalame){
   if (strcmp(dastooorat[2],"-m")!=0){
     printf("command not found\n");
@@ -850,6 +915,8 @@ system(command);
 //tahcommitha==============================================================
 //log ha ===============================================================
   int austhor_yab(char* author,int n,int sh_commit_ok[n],FILE* cominfo_file);
+  int zoodtaryab(char* zaman_aval,char*zaman_dovom);
+  int time_com(char* time_hadaf,int n,FILE* cominfo_file);
  void logcom(char** dastooorat,int tedad_kalame){
 char address_cominfo[100];
 strcpy(address_cominfo,dotGitYab());
@@ -890,6 +957,15 @@ else if ((tedad_kalame>=4)&&(strcmp(dastooorat[2],"-search")==0))
     printf("the word doesn't exist\n");
     return;
 }
+else if ((tedad_kalame=4)&&((strcmp(dastooorat[2],"-since")==0)||(strcmp(dastooorat[2],"-before")==0)))
+{
+    if((strcmp(dastooorat[2],"-since")==0))
+    n+=500;
+ ted_com = time_com(dastooorat[3],n,cominfo_file);
+ if (ted_com==0)
+    printf("no commit %s this time\n",dastooorat[2]);
+    return;
+}
 rewind(cominfo_file);
 int k=0;
 for (int i = 0; i < ted_com; i++)
@@ -918,6 +994,124 @@ for (int i = 0; i < ted_com; i++)
 }
 fclose(cominfo_file);
 }
+
+int time_com(char* time_hadaf,int n,FILE* cominfo_file){
+    int mahala=0;
+    int parcham=0;
+    if(n>=500){
+        n-=500;
+        parcham=1;
+        //since
+    }
+    int mahalp=n;
+rewind(cominfo_file);
+char zamanha[100];
+for (int i = 0; i < n; i++)
+{
+    char alak[200];
+fgets(alak,199,cominfo_file);
+fscanf(cominfo_file,"time: \"%[^\"]\"\n",zamanha);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+int parcham2 =zoodtaryab(zamanha,time_hadaf);
+if ((parcham2==1)&&(parcham==1))
+{
+mahala=i;
+//az hamin shroo she
+break;
+}
+else if((parcham2==2)&&(parcham==0)){
+    mahalp=i+1;
+// if(i==0)
+// return 1;
+}
+else if ((i==n-1)&&(parcham==1))
+{
+return 0;
+}
+else if ((i==n-1)&&(parcham==0)&&(mahalp==n))
+{
+return 0;
+}
+    }
+
+
+    rewind(cominfo_file);
+int k=0;
+char c;
+for (int i = n-mahalp; i < n-mahala; i++)
+{
+    while (k!=(n-i-1))
+    {
+    
+    c= fgetc(cominfo_file);
+    if(c=='@')
+     k++;
+    }
+    if (k==(n-i-1))
+    {
+        fgetc(cominfo_file);
+        char c2=' ';
+        while (c2!='@')
+        {
+            c2 =fgetc(cominfo_file);
+            printf("%c",c2);
+        }
+        printf("\n");
+        k=0;
+        rewind(cominfo_file);
+        continue;
+    }  
+}
+fclose(cominfo_file);
+return 1;
+}
+
+  int zoodtaryab(char* zaman_aval,char*zaman_dovom){
+int sal_av;
+    int mah_av;
+    int rooz_av;
+    int saat_av;
+    int daghighe_av;
+    int sanie_av;
+    int sal_do;
+    int mah_do;
+    int rooz_do;
+    int saat_do;
+    int daghighe_do;
+    int sanie_do;
+    sscanf(zaman_aval,"%d/%d/%d %d:%d:%d",&sal_av,&mah_av,&rooz_av,&saat_av,&daghighe_av,&sanie_av);
+    sscanf(zaman_dovom,"%d/%d/%d %d:%d:%d",&sal_do,&mah_do,&rooz_do,&saat_do,&daghighe_do,&sanie_do);
+    if(sal_av>sal_do)
+    return 1;
+    if(sal_av<sal_do)
+    return 2;
+    else if(mah_av>mah_do)
+    return 1;
+    else if(mah_av<mah_do)
+    return 2;
+    else if(rooz_av>rooz_do)
+    return 1;
+    else if(rooz_av<rooz_do)
+    return 2;
+    else if(saat_av>saat_do)
+    return 1;
+    else if(saat_av<saat_do)
+    return 2;
+    else if(daghighe_av>daghighe_do)
+    return 1;
+    else if(daghighe_av<daghighe_do)
+    return 2;
+    else if(sanie_av>sanie_do)
+    return 1;
+    else if(sanie_av<sanie_do)
+    return 2;
+    else return 2;
+  }
 
   int austhor_yab(char* author,int n,int sh_commit_ok[n],FILE* cominfo_file){
     int ted=0;
