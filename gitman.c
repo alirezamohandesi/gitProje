@@ -1328,4 +1328,5 @@ int main(int tedad_kalame, char **dastoorat)
     else if (strcmp("log", dastoorat[1]) == 0)
     logcom(dastoorat, tedad_kalame);
     return 0;
+    
 }
