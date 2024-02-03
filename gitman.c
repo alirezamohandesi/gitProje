@@ -5,6 +5,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <ctype.h>
 
 #define ADDRRES_GLOBAL /mnt/f/my daneshgah/proje/global
 void alias(char **dastoorat, int tedad_kalame);
@@ -212,6 +213,9 @@ void init(char **dastoorat, int tedad_kalame)
      avalesh = fopen(".gitman/config.txt", "w");
     fprintf(avalesh, "#");
     fclose(avalesh);
+    avalesh = fopen(".gitman/branch_hal.txt", "w");
+    fprintf(avalesh, "master");
+    fclose(avalesh);
     printf("\n");
 }
 //addha =============================================================
@@ -391,7 +395,7 @@ char direntrry[20][20];
 
     for (int i = 0; i < j; i++)
     {
-         if (strcmp(direntrry[i], ".") == 0 || strcmp(direntrry[i], "..") == 0) {
+         if (strncmp(direntrry[i], ".",1) == 0 || strcmp(direntrry[i], "..") == 0) {
             continue;
         }
         char address2[100];
@@ -410,7 +414,7 @@ strcat(address2,"/addha.txt");
     
     while ((entry1 = readdir(dir1)) != NULL) {
         FILE* addha=fopen(address2,"a");
-        if (strcmp(entry1->d_name, ".") == 0 || strcmp(entry1->d_name, "..") == 0) 
+        if (strncmp(entry1->d_name, ".",1) == 0 || strcmp(entry1->d_name, "..") == 0) 
             continue;
     fprintf(addha,"%s\n",entry1->d_name);
     fclose(addha);
@@ -656,13 +660,15 @@ void commit(char** dastooorat,int tedad_kalame){
 char address_staged[100];
 char address_commit[100];
 char address_addha[100];
+char address_sh_akhcom[100];
 strcpy(address_staged,dotGitYab());
 strcat(address_staged,"/staged");
 strcpy(address_commit,dotGitYab());
 strcat(address_commit,"/commitha");
 strcpy(address_addha,dotGitYab());
 strcat(address_addha,"/addha.txt");
-
+strcpy(address_sh_akhcom,dotGitYab());
+strcat(address_sh_akhcom,"/sh_akhcom.txt");
 struct dirent* staged;
   DIR *dirstag= opendir(address_staged);
   int n=0;
@@ -773,8 +779,12 @@ FILE* com_info = fopen(address_commit_info,"a");
             continue;
     m++;
   }
-  
-fprintf(com_info,"payam: \"%s\"\ntime: \"%s\"\nname: %s\nemail: %s\nnumber of files: %d\nID: %d\nbranch: master\n@\n",dastooorat[3],buffer,name,email,n,m+1);
+  FILE* avalesh = fopen(".gitman/branch_hal.txt", "r");
+  char branch_name[100];
+    fscanf(avalesh, "%s",branch_name);
+    fclose(avalesh);
+
+fprintf(com_info,"payam: \"%s\"\ntime: \"%s\"\nname: %s\nemail: %s\nnumber of files: %d\nID: %d\nbranch: %s\n@\n",dastooorat[3],buffer,name,email,n,m+1,branch_name);
 fclose(com_info);
 // brancham bezar
   closedir(dircommit);
@@ -788,7 +798,9 @@ fclose(com_info);
     system(command);
      FILE* a= fopen(address_addha,"w");
     fclose(a);
-    
+     a= fopen(address_sh_akhcom,"w");
+     fprintf(a,"%d",m+1);
+    fclose(a);
 }
 
 void commit_ghabli_biar(int sh_commit){
@@ -837,7 +849,7 @@ int file_yab(char *file_name){
    if(c==EOF)
    break;
     fgets(khat,199,javab);
-if (strncmp(khat,"/.gitman",7)!=0)
+if (strncmp(khat,"/.git",5)!=0)
 return 1;
 
  }
@@ -957,7 +969,7 @@ else if ((tedad_kalame>=4)&&(strcmp(dastooorat[2],"-search")==0))
     printf("the word doesn't exist\n");
     return;
 }
-else if ((tedad_kalame=4)&&((strcmp(dastooorat[2],"-since")==0)||(strcmp(dastooorat[2],"-before")==0)))
+else if ((tedad_kalame==4)&&((strcmp(dastooorat[2],"-since")==0)||(strcmp(dastooorat[2],"-before")==0)))
 {
     if((strcmp(dastooorat[2],"-since")==0))
     n+=500;
@@ -1209,6 +1221,220 @@ for (int i = 0; i < n; i++)
 return ted;
   }
 //tah log ha ===============================================================
+//branch===================================================================
+void branch_chap(char add_branch_name[100]);
+void branch(char** dastooorat,int tedad_kalame){
+char add_branch_name[100];
+strcpy(add_branch_name,dotGitYab());
+strcat(add_branch_name,"/branches.txt");
+    if(tedad_kalame==2){
+    branch_chap(add_branch_name);
+    return;
+    }
+    FILE* branch_name_file = fopen(add_branch_name,"r");
+    int parcham =1;
+    if (branch_name_file==NULL)
+parcham=0;
+char b_name[100];
+char c;
+while ((b_name[0]!=EOF)&&parcham)
+{
+fscanf(branch_name_file,"%s",b_name);
+if (strcmp(b_name,dastooorat[2])==0)
+{
+    printf("the branch neme already exist\n");
+    return;
+}
+c=fgetc(branch_name_file);
+if(c==EOF)
+break;
+}
+fclose(branch_name_file);
+
+    branch_name_file = fopen(add_branch_name,"a");
+    fprintf(branch_name_file,"%s\n",dastooorat[2]);
+    fclose(branch_name_file);
+    char add_branch_fir[100];
+    if(strlen(dotGitYab())==1){
+        printf("fatal: not in a gitman directory\n");
+            return;
+    }
+    char address_sh_akhcom[100];
+    strcpy(address_sh_akhcom,dotGitYab());
+strcat(address_sh_akhcom,"/sh_akhcom.txt");
+    char command[200];
+    int sh_akhcom;
+sprintf(command,"mkdir .git_branch_%s",dastooorat[2]);
+system(command);
+FILE* file_akhcom =fopen(address_sh_akhcom,"r");
+if (file_akhcom!=NULL)
+{
+fscanf(file_akhcom,"%d",&sh_akhcom);
+sprintf(command,"cp .gitman/commitha/commit%d/* .git_branch_%s",sh_akhcom,dastooorat[2]);
+system (command);
+}
+fclose(file_akhcom);
+}
+
+void branch_chap(char add_branch_name[100]){
+FILE* branches =fopen(add_branch_name,"r");
+if (branches==NULL)
+{
+printf("There are no branches\n");
+return;
+}
+char b_name[100];
+char c;
+while (b_name[0]!=EOF)
+{
+fscanf(branches,"%s",b_name);
+c=fgetc(branches);
+if(c==EOF)
+break;
+printf("%s\n",b_name);
+
+}
+
+
+
+}
+//tahbranch===================================================================
+//checkout====================================================================
+int check_taqir();
+void checkout(char** dastooorat,int tedad_kalame){
+    char hal_bra[100];
+FILE* branch_hal_file =fopen(".gitman/branch_hal.txt","r");
+fscanf(branch_hal_file,"%s",hal_bra);
+fclose(branch_hal_file);
+    int check =check_taqir();
+if (check==0)
+{
+printf("please commit your changs\n");
+return;
+}
+if(isdigit( dastooorat[2][0])){
+    ///commite
+}
+else{
+    char command[150];
+    char dir_branch_hal[100];
+    strcpy(dir_branch_hal,".git_branch_");
+    strcat(dir_branch_hal,hal_bra);
+    if (access(dir_branch_hal, F_OK) == 0){
+    sprintf(command,"rm -r %s",dir_branch_hal);
+        system(command);
+    }
+    sprintf(command,"mkdir %s",dir_branch_hal);
+        system(command);
+        sprintf(command,"mv [!.]* %s",dir_branch_hal);
+        system(command);
+
+        //rikhtan file haye bra jadid
+        char dir_branch_jad[100];
+    strcpy(dir_branch_jad,".git_branch_");
+    strcat(dir_branch_jad,dastooorat[2]);
+        sprintf(command,"cp -r %s/[!.]* .",dir_branch_jad);
+        system(command);
+FILE* branch_hal_file =fopen(".gitman/branch_hal.txt","w");
+fprintf(branch_hal_file,"%s",dastooorat[2]);
+fclose(branch_hal_file);
+}
+}
+
+int check_taqir(){
+    char hal_bra[100];
+    int sh_akhcom;
+FILE* branch_hal_file =fopen(".gitman/branch_hal.txt","r");
+fscanf(branch_hal_file,"%s",hal_bra);
+fclose(branch_hal_file);
+FILE* file_akhcom= fopen(".gitman/sh_akhcom.txt","r");
+fscanf(file_akhcom,"%d", &sh_akhcom);
+fclose(file_akhcom);
+FILE* cominfo_file = fopen(".gitman/commit_info.txt","r");
+char alak[200];
+char zaman_akhcom_bra[200];
+char zamanha[200];
+int sh_akhcom_bra=0;
+for (int i = 0; i < sh_akhcom; i++)
+{
+    fgets(alak,199,cominfo_file);
+fscanf(cominfo_file,"time: \"%[^\"]\"\n",zamanha);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fscanf(cominfo_file,"branch: %s\n",alak);
+// printf("%s",alak);
+if (strcmp(alak,hal_bra)==0){
+    sh_akhcom_bra=i+1;
+strcpy(zaman_akhcom_bra,zamanha);
+}
+fgets(alak,199,cominfo_file);
+}
+if(sh_akhcom==0)
+strcpy(zaman_akhcom_bra,"2023/02/01 00:58:16");
+// printf("%s\n",zaman_akhcom_bra);
+// printf("%s\n",hal_bra);
+
+DIR* branch_folder;
+branch_folder= opendir(".");
+if(branch_folder==NULL){
+printf("???");
+return 0 ;
+}
+struct dirent* fileha_branch;
+while ((fileha_branch = readdir(branch_folder)) != NULL) {
+        // strcpy(direntrry[j],entry->d_name);
+        if (strncmp(fileha_branch->d_name, ".",1) == 0 || strcmp(fileha_branch->d_name, "..") == 0) 
+            continue;
+struct stat entryha;
+stat(fileha_branch->d_name,&entryha);
+// printf("%s  ",fileha_branch->d_name);
+//=====
+// time_t rawtime;
+   struct tm *info;
+   char buffer[80];
+//    time(&entryha.st_mtime);
+
+   info = localtime( &entryha.st_mtime );
+      strftime(buffer,80,"%Y/%m/%d %X", info);
+//=====
+// printf("%s\n",buffer);
+int a=zoodtaryab(buffer,zaman_akhcom_bra);
+if (a==1)
+return 0;
+DIR* dirdakhel= opendir(fileha_branch->d_name);
+if(dirdakhel==NULL)
+continue;
+struct dirent* fileha_branch_dakhel;
+while ((fileha_branch_dakhel = readdir(dirdakhel)) != NULL) {
+        // strcpy(direntrry[j],entry->d_name);
+        if (strncmp(fileha_branch_dakhel->d_name, ".",1) == 0 || strcmp(fileha_branch_dakhel->d_name, "..") == 0) 
+            continue;
+struct stat entryha1;
+char add[100];
+strcpy(add,fileha_branch->d_name);
+strcat(add,"/");
+strcat(add,fileha_branch_dakhel->d_name);
+stat(add,&entryha1);
+// printf("%s  ",fileha_branch_dakhel->d_name);
+//=================================
+  struct tm *info;
+   char buffer[80];
+//    time(&entryha1.st_mtime);
+   info = localtime( &entryha1.st_mtime );
+      strftime(buffer,80,"%Y/%m/%d %X", info);
+//=================================
+// printf("%s\n",buffer);
+int a=zoodtaryab(buffer,zaman_akhcom_bra);
+if (a==1)
+return 0;
+
+}
+    }
+    return 1;
+}
+//tahcheckout====================================================================
 //omoomy portekrar===================================================================
 char *dotGitYab()
 {
@@ -1250,6 +1476,15 @@ int wildkart(char* dastoor2,int tedWildcart,char direntrry[20][20],int j,int shd
     int o=0;
     char zapas[20];
     strcpy(zapas,dastoor2);
+    if (strcmp(dastoor2,"*")==0)
+    {
+        printf("1111");
+        for (int i = 0; i < j; i++)
+            shdorosta[i]=i;
+        
+        return j;
+    }
+    
     const char s[2] = "*";
    char *token;
    token = strtok(zapas, s);
@@ -1327,6 +1562,9 @@ int main(int tedad_kalame, char **dastoorat)
     replace(dastoorat, tedad_kalame,0);
     else if (strcmp("log", dastoorat[1]) == 0)
     logcom(dastoorat, tedad_kalame);
+    else if (strcmp("branch", dastoorat[1]) == 0)
+    branch(dastoorat, tedad_kalame);
+    else if (strcmp("checkout", dastoorat[1]) == 0)
+    checkout(dastoorat, tedad_kalame);
     return 0;
-    
 }
