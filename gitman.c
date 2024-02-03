@@ -650,16 +650,20 @@ void file_addha_reset(char addres[100],char name[100]){
  system("rm bash.sh");
 }
 //tahresetha=========================================================
-//status==================================================================
-void status(char** dastoorat,int tedad_kalame){
-    //ba commitha chekshe
-
-}
-//tahstatus==================================================================
 //commitha==============================================================
 void commit_ghabli_biar(int sh_commit);
 int file_yab(char* file_name);
 void commit(char** dastooorat,int tedad_kalame){
+    char add_head[100];
+    strcpy(add_head,dotGitYab());
+    strcat(add_head,"/head.txt");
+    FILE* x=fopen(add_head,"r");
+    if (x!=NULL)
+    {
+printf("you can't commit out of HEAD\n");
+return;
+    }
+    
 char address_staged[100];
 char address_commit[100];
 char address_addha[100];
@@ -1310,11 +1314,19 @@ FILE* branch_hal_file =fopen(".gitman/branch_hal.txt","r");
 fscanf(branch_hal_file,"%s",hal_bra);
 fclose(branch_hal_file);
     int check =check_taqir();
-if (check==0)
+    int head_par =0;
+     if(strcmp(dastooorat[2],"HEAD")==0){
+strcpy(dastooorat[2],hal_bra);
+system("rm .gitman/head.txt");
+head_par =1;
+}
+
+else if (check==0)
 {
 printf("please commit your changes\n");
 return;
 }
+
 if(isdigit( dastooorat[2][0])){
     //پیدا کردن هد
         char hal_bra[100];
@@ -1343,6 +1355,9 @@ if (strcmp(alak,hal_bra)==0){
 }
 fgets(alak,199,cominfo_file);
 }
+FILE* file = fopen(".gitman/head.txt","w");
+fprintf(file,"%d\n",sh_akhcom_bra);
+fclose(file);
 //پاک کردن هد و ریختن فایلای فعلی توش و پاک کردن محل کار
 char command[150];
     char dir_commit_hal[100];
@@ -1359,14 +1374,15 @@ char command[150];
             sprintf(dir_commit_jad,".gitman/commitha/commit%s",dastooorat[2]);
         sprintf(command,"cp -r %s/[!.]* .",dir_commit_jad);
         system(command);
-}
 
+}
 
 else{
     char command[150];
     char dir_branch_hal[100];
     strcpy(dir_branch_hal,".git_branch_");
     strcat(dir_branch_hal,hal_bra);
+    if(head_par==0){
     if (access(dir_branch_hal, F_OK) == 0){
     sprintf(command,"rm -r %s",dir_branch_hal);
         system(command);
@@ -1375,6 +1391,11 @@ else{
         system(command);
         sprintf(command,"mv [!.]* %s",dir_branch_hal);
         system(command);
+    }
+    else{
+        sprintf(command,"rm [!.]* ");
+        system(command);
+    }
         char add_zaman_check[100];
         // strcpy(add_zaman_check,dir_branch_hal);
         // strcat(add_zaman_check,"/.zaman_check.txt");
@@ -1440,7 +1461,7 @@ strcpy(zaman_akhcom_bra,zamanha);
 }
 fgets(alak,199,cominfo_file);
 }
-if(sh_akhcom==0)
+if(sh_akhcom==0||sh_akhcom_bra==0)
 strcpy(zaman_akhcom_bra,"2023/02/01 00:58:16");
 // printf("%s\n",zaman_akhcom_bra);
 // printf("%s\n",hal_bra);
@@ -1524,6 +1545,120 @@ return 0;
     return 1;
 }
 //tahcheckout====================================================================
+//status==================================================================
+void status(char** dastoorat,int tedad_kalame){
+    system("mv .gitman/addha.txt .gitman/addha1.txt");
+    system("mv .gitman/staged .gitman/staged1");
+    char** aldastoorat;
+    aldastoorat=malloc(100*sizeof(int*));
+    for (int i = 0; i < 100; i++)
+    aldastoorat[i]=malloc(100);
+    strcpy(aldastoorat[2],"*");
+system("mkdir .gitman/staged");
+    add(aldastoorat,3);
+DIR* branch_folder;
+branch_folder= opendir(".gitman/staged");
+if(branch_folder==NULL){
+printf("???");
+return  ;
+}
+
+ char hal_bra[100];
+    int sh_akhcom;
+FILE* branch_hal_file =fopen(".gitman/branch_hal.txt","r");
+fscanf(branch_hal_file,"%s",hal_bra);
+fclose(branch_hal_file);
+FILE* file_akhcom= fopen(".gitman/sh_akhcom.txt","r");
+fscanf(file_akhcom,"%d", &sh_akhcom);
+fclose(file_akhcom);
+FILE* cominfo_file = fopen(".gitman/commit_info.txt","r");
+char alak[200];
+char zaman_akhcom_bra[200];
+char zamanha[200];
+int sh_akhcom_bra=0;
+for (int i = 0; i < sh_akhcom; i++)
+{
+    fgets(alak,199,cominfo_file);
+fscanf(cominfo_file,"time: \"%[^\"]\"\n",zamanha);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fscanf(cominfo_file,"branch: %s\n",alak);
+// printf("%s",alak);
+if (strcmp(alak,hal_bra)==0){
+    sh_akhcom_bra=i+1;
+strcpy(zaman_akhcom_bra,zamanha);
+}
+fgets(alak,199,cominfo_file);
+}
+if(sh_akhcom==0||sh_akhcom_bra==0)
+strcpy(zaman_akhcom_bra,"2023/02/01 00:58:16");
+
+struct dirent* fileha_branch;
+while ((fileha_branch = readdir(branch_folder)) != NULL) {
+        // strcpy(direntrry[j],entry->d_name);
+        if (strncmp(fileha_branch->d_name, ".",1) == 0 || strcmp(fileha_branch->d_name, "..") == 0) 
+            continue;
+struct stat entryha;
+stat(fileha_branch->d_name,&entryha);
+printf("%s  ",fileha_branch->d_name);
+//=====
+// time_t rawtime;
+   struct tm *info;
+   char buffer[80];
+//    time(&entryha.st_mtime);
+   info = localtime( &entryha.st_mtime );
+      strftime(buffer,80,"%Y/%m/%d %X", info);
+int a=zoodtaryab(buffer,zaman_akhcom_bra);
+      if(a==2)   
+      continue;
+    char nextLine;
+  int l=0;
+  char c;
+char addresaddha[100];
+strcpy(addresaddha,".gitman/addha1.txt");
+    char addha[100];
+FILE* addhaFile=fopen(addresaddha,"r");
+    int parcham=0;
+    do
+    {
+        fscanf(addhaFile,"%s",addha);
+        c=fgetc(addhaFile);
+        if (strcmp(addha,fileha_branch->d_name)==0)
+        {
+            printf("+");
+            parcham=1;
+            break;
+        }
+        
+        
+    } while (c=='\n');
+    if (parcham==0)
+    printf("-");
+    
+    rewind(addhaFile);
+    // time_t rawtime;
+   struct tm *info1;
+   char buffer1[80];
+//    time(&entryha.st_mtime);
+
+   info1 = localtime( &entryha.st_ctime );
+      strftime(buffer1,80,"%Y/%m/%d %X", info1);
+ a=zoodtaryab(buffer1,zaman_akhcom_bra);
+      if(a==2)
+      printf("AAAA");
+
+    printf("%s   %s\n",buffer,buffer1);
+
+}
+
+system("rm -r .gitman/staged");
+system("rm -r .gitman/addha.txt");
+  system("mv .gitman/addha1.txt .gitman/addha.txt ");
+    system("mv .gitman/staged1 .gitman/staged ");
+}
+//tahstatus==================================================================
 //omoomy portekrar===================================================================
 char *dotGitYab()
 {
