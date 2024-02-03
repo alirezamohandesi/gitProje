@@ -271,6 +271,9 @@ else if (tedWildcart)
     dir = opendir(cwd);
     int j=0;
     while ((entry = readdir(dir)) != NULL) {
+        if (strncmp(entry->d_name, ".",1) == 0 || strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
         strcpy(direntrry[j],entry->d_name);
         j++;
     }
@@ -1122,7 +1125,7 @@ int sal_av;
     return 1;
     else if(sanie_av<sanie_do)
     return 2;
-    else return 2;
+    else return 3;
   }
 
   int austhor_yab(char* author,int n,int sh_commit_ok[n],FILE* cominfo_file){
@@ -1309,12 +1312,56 @@ fclose(branch_hal_file);
     int check =check_taqir();
 if (check==0)
 {
-printf("please commit your changs\n");
+printf("please commit your changes\n");
 return;
 }
 if(isdigit( dastooorat[2][0])){
-    ///commite
+    //پیدا کردن هد
+        char hal_bra[100];
+    int sh_akhcom;
+FILE* branch_hal_file =fopen(".gitman/branch_hal.txt","r");
+fscanf(branch_hal_file,"%s",hal_bra);
+fclose(branch_hal_file);
+FILE* file_akhcom= fopen(".gitman/sh_akhcom.txt","r");
+fscanf(file_akhcom,"%d", &sh_akhcom);
+fclose(file_akhcom);
+FILE* cominfo_file = fopen(".gitman/commit_info.txt","r");
+char alak[200];
+int sh_akhcom_bra=0;
+for (int i = 0; i < sh_akhcom; i++)
+{
+    fgets(alak,199,cominfo_file);
+    fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fscanf(cominfo_file,"branch: %s\n",alak);
+// printf("%s",alak);
+if (strcmp(alak,hal_bra)==0){
+    sh_akhcom_bra=i+1;
 }
+fgets(alak,199,cominfo_file);
+}
+//پاک کردن هد و ریختن فایلای فعلی توش و پاک کردن محل کار
+char command[150];
+    char dir_commit_hal[100];
+    sprintf(dir_commit_hal,".gitman/commitha/commit%d",sh_akhcom_bra);
+    sprintf(command,"rm -r %s",dir_commit_hal);
+        system(command);
+    
+    sprintf(command,"mkdir %s",dir_commit_hal);
+        system(command);
+        sprintf(command,"mv [!.]* %s",dir_commit_hal);
+        system(command);
+        //ریختن فایل های کامیته در اینجا
+        char dir_commit_jad[100];
+            sprintf(dir_commit_jad,".gitman/commitha/commit%s",dastooorat[2]);
+        sprintf(command,"cp -r %s/[!.]* .",dir_commit_jad);
+        system(command);
+}
+
+
 else{
     char command[150];
     char dir_branch_hal[100];
@@ -1328,13 +1375,35 @@ else{
         system(command);
         sprintf(command,"mv [!.]* %s",dir_branch_hal);
         system(command);
+        char add_zaman_check[100];
+        // strcpy(add_zaman_check,dir_branch_hal);
+        // strcat(add_zaman_check,"/.zaman_check.txt");
+// FILE* f= fopen(add_zaman_check,"w");
+time_t rawtime;
+   struct tm *info;
+   char buffer[80];
+   time(&rawtime);
 
+   info = localtime( &rawtime );
+
+   strftime(buffer,80,"%Y/%m/%d %X", info);
+// fprintf(f,"%s",buffer);
+// fclose(f);
         //rikhtan file haye bra jadid
         char dir_branch_jad[100];
     strcpy(dir_branch_jad,".git_branch_");
     strcat(dir_branch_jad,dastooorat[2]);
         sprintf(command,"cp -r %s/[!.]* .",dir_branch_jad);
         system(command);
+
+        // strcpy(add_zaman_check,dir_branch_jad);
+        // strcat(add_zaman_check,"/.zaman_check.txt");
+// FILE* f1= fopen(add_zaman_check,"w");
+// fprintf(f1,"%s",buffer);
+// fclose(f1);
+FILE* f1 =fopen(".gitman/.zaman_check.txt","w");
+fprintf(f1,"%s",buffer);
+fclose(f1);
 FILE* branch_hal_file =fopen(".gitman/branch_hal.txt","w");
 fprintf(branch_hal_file,"%s",dastooorat[2]);
 fclose(branch_hal_file);
@@ -1382,6 +1451,7 @@ if(branch_folder==NULL){
 printf("???");
 return 0 ;
 }
+
 struct dirent* fileha_branch;
 while ((fileha_branch = readdir(branch_folder)) != NULL) {
         // strcpy(direntrry[j],entry->d_name);
@@ -1401,6 +1471,16 @@ stat(fileha_branch->d_name,&entryha);
 //=====
 // printf("%s\n",buffer);
 int a=zoodtaryab(buffer,zaman_akhcom_bra);
+FILE* f1;
+char zaman_checkout[100];
+f1 =fopen(".gitman/.zaman_check.txt","r");
+if(f1!=NULL){
+fgets(zaman_checkout,99,f1);
+fclose(f1);
+if(zoodtaryab(buffer,zaman_checkout)==3)
+a=2;
+}
+// printf("%s  %s   %s", buffer,zaman_checkout,zaman_akhcom_bra);
 if (a==1)
 return 0;
 DIR* dirdakhel= opendir(fileha_branch->d_name);
@@ -1427,6 +1507,15 @@ stat(add,&entryha1);
 //=================================
 // printf("%s\n",buffer);
 int a=zoodtaryab(buffer,zaman_akhcom_bra);
+FILE* f1;
+char zaman_checkout[100];
+f1 =fopen(".gitman/.zaman_check.txt","r");
+if(f1!=NULL){
+fgets(zaman_checkout,99,f1);
+fclose(f1);
+if(zoodtaryab(buffer,zaman_checkout)==3)
+a=2;
+}
 if (a==1)
 return 0;
 
