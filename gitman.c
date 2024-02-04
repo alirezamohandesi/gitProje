@@ -39,7 +39,7 @@ void configor(char **dastoorat, int tedad_kalame)
         fclose(hoviat);
         hoviat = fopen("/mnt/f/my daneshgah/proje/global/name.txt", "w");
         fprintf(hoviat, "name:%s\nemail:%s\n", name, email);
-        printf("%s\n%s", name, email);
+        // printf("%s\n%s", name, email);
         fclose(hoviat);
     }
 
@@ -70,7 +70,7 @@ void configor(char **dastoorat, int tedad_kalame)
         fclose(config);
         config = fopen(addres, "w");
         fprintf(config, "name:%s\nemail:%s\n", name, email);
-        printf("%s\n%s", name, email);
+        // printf("%s\n%s", name, email);
         fclose(config);
     }
 }
@@ -102,7 +102,7 @@ void alias(char **dastoorat, int tedad_kalame)
     {
         if (strncmp(dastoorat[3],"gitman ",7)!=0)
         {
-        printf("command not found");
+        printf("command not found\n");
         return;
         }
 
@@ -199,7 +199,7 @@ void init(char **dastoorat, int tedad_kalame)
     strcpy(chek,dotGitYab());
     if (strcmp(chek,"?")!=0)
     {
-        printf("there is already a .git directory here or in upper directories \n");
+        printf("there is already a .gitman directory here or in upper directories \n");
         return;
     }
     
@@ -207,8 +207,8 @@ void init(char **dastoorat, int tedad_kalame)
     printf("Initialized empty Git repository ");
     system("mkdir -p .gitman/staged");
     system("mkdir -p .gitman/commitha");
+    system("mkdir -p .gitman/resetshode");
     FILE *avalesh = fopen(".gitman/commit_info.txt", "w");
-    fprintf(avalesh, "#");
     fclose(avalesh);
      avalesh = fopen(".gitman/config.txt", "w");
     fprintf(avalesh, "#");
@@ -221,7 +221,7 @@ void init(char **dastoorat, int tedad_kalame)
 //addha =============================================================
  void copyCon( char** dastoorat,int tedad_kalame,char* addres);
 void dirpakCon(char** dastoorat,int tedad_kalame,char* addres);
-void add_n();
+void add_n(int omgh,char* add_folder);
 void add(char** dastoorat,int tedad_kalame){
     char addresaddha1[100];
 strcpy(addresaddha1,dotGitYab());
@@ -237,7 +237,7 @@ fprintf(addhaFile1,"@\n");
         if(dastoorat[2][i]=='*')
         tedWildcart++;
     }
-    printf("%d\n%s",tedWildcart,dastoorat[2]);
+    // printf("%d\n%s",tedWildcart,dastoorat[2]);
     if (strcmp(dotGitYab(),"?")==0)
     {
         printf("fatal: not in a gitman directory\n");
@@ -256,8 +256,8 @@ if (strcmp("-f", dastoorat[2]) == 0)
 }
 else if (strcmp("-n", dastoorat[2]) == 0)
 {
-
-add_n();
+int omgh =(int)(dastoorat[3][0]-48);
+add_n(omgh,".");
     return ;
 }
 else if (tedWildcart)
@@ -287,6 +287,31 @@ int shDorosta[20];
     }
     
 }
+else if (strcmp("-redo", dastoorat[2]) == 0)
+{
+    char command[300];
+    sprintf(command,"mv %s/resetshode/* %s/staged",dotGitYab(),dotGitYab());
+    system(command);
+    char resetshode[100];
+    sprintf(resetshode,"%s/resetshode.txt",dotGitYab());
+    FILE* resetshodef =fopen(resetshode,"r");
+    char addha[100];
+    sprintf(addha,"%s/addha.txt",dotGitYab());
+    FILE* addhaf =fopen(addha,"a");
+    char c=' ';
+    while (c!=EOF)
+    {
+        c=fgetc(resetshodef);
+        if(c!=EOF)
+        fprintf(addhaf,"%c",c);
+
+    }
+    // fprintf(addhaf,"@\n");
+    fclose(addhaf);
+    fclose(resetshodef);
+    addhaf =fopen(resetshode,"w");
+    fclose(addhaf);
+}
 
  
 else
@@ -294,16 +319,25 @@ else
 fclose(addhaFile1);
 
 }
-void add_n(){
+void add_n(int omgh,char* add_folder){
 char direntrry[20][20];
     DIR *dir;
-    char cwd[PATH_MAX];
-    getcwd(cwd, sizeof(cwd));
+    // char cwd[PATH_MAX];
+    // getcwd(cwd, sizeof(cwd));
     struct dirent *entry;
-    dir = opendir(cwd);
+    dir = opendir(add_folder);
     int j=0;
     while ((entry = readdir(dir)) != NULL) {
+        if(strncmp(entry->d_name,".",1)==0)
+        continue;
         strcpy(direntrry[j],entry->d_name);
+        char add_zirfol[600];
+        sprintf(add_zirfol,"%s/%s",add_folder,entry->d_name);
+        if ((opendir(add_zirfol)!=NULL)&&(omgh>1))
+        {
+            add_n(omgh-1,add_zirfol);
+        }
+        
         j++;
     }
         closedir(dir);
@@ -366,15 +400,18 @@ if (strcmp(direntrry[i], ".") == 0 || strcmp(direntrry[i], "..") == 0)
 void copyCon(char** dastoorat,int tedad_kalame,char* addres){
 char address2[100];
 strcpy(address2,dotGitYab());
-strcat(address2,"/addha.txt");
-    FILE* addha=fopen(address2,"a");
-    fprintf(addha,"%s\n",dastoorat[2]);
-    fclose(addha);
+strcat(address2,"/addha.txt"); 
  FILE* bash = fopen("bash.sh","w");
  fprintf(bash,"#!/bin/bash\ncp -r %s %s ",dastoorat[2],addres);
  fclose(bash);
  system("./bash.sh");
  system("rm bash.sh");
+ if(access(dastoorat[2],F_OK)!=0){
+    return;
+ }
+ FILE* addha=fopen(address2,"a");
+    fprintf(addha,"%s\n",dastoorat[2]);
+    fclose(addha);
  dirpakCon( dastoorat, tedad_kalame, addres);
 }
 
@@ -452,7 +489,7 @@ void reset(char** dastoorat,int tedad_kalame){
         if(dastoorat[2][i]=='*')
         tedWildcart++;
     }
-    printf("%d\n%s",tedWildcart,dastoorat[2]);
+    // printf("%d\n%s",tedWildcart,dastoorat[2]);
     if (strcmp(dotGitYab(),"?")==0)
     {
         printf("fatal: not in a gitman directory\n");
@@ -502,6 +539,12 @@ else
 }
 
 void undoreset(char addres[100]){
+    char *addres5 = dotGitYab();
+            if (strcmp(addres5, "?") == 0){
+            printf("fatal: not in a gitman directory\n");
+            return;
+        }
+
     char addres2[100];
     strcpy(addres2,dotGitYab());
     strcat(addres2,"/addha.txt");
@@ -533,15 +576,17 @@ void undoreset(char addres[100]){
 
 stat(resetiha,&st);
 // goh sag dorost nashod :eror bara dir ha
-    //    if(!( S_ISDIR(st.st_mode))){
+char add_staged[500];
+sprintf(add_staged,"%s/%s",addres,resetiha);
+       if(access(add_staged,F_OK)==0){
  FILE* bash = fopen("bash.sh","w");
- fprintf(bash,"#!/bin/bash\nrm %s/%s ",addres,resetiha);
+ fprintf(bash,"#!/bin/bash\nmv %s/%s %s/resetshode ",addres,resetiha,dotGitYab());
  fclose(bash);
  system("./bash.sh");
  system("rm bash.sh");
         // resetcon(resetiha,addres,resetiha);
         
-    //    }
+       }
         }
     } while (strcmp(resetiha,"@")!=0);
     strcpy(addres,dotGitYab());
@@ -557,6 +602,9 @@ char addres2[100];
 strcpy(addres2,addres);
 strcat(addres2,"1");
 FILE* addhaFile1 =fopen(addres2,"w");
+char add_resetshode[300];
+    sprintf(add_resetshode,"%s/resetshode.txt",dotGitYab());
+    FILE* resetshodeha =fopen(add_resetshode,"a");
     do
     {
         
@@ -571,6 +619,15 @@ FILE* addhaFile1 =fopen(addres2,"w");
         if(c=='@')
         i++;
     }
+    fprintf(addhaFile1,"\n");
+   c= fgetc(addhaFile);
+    while (c!='@')
+    {
+       c= fgetc(addhaFile);
+       if(c!='@')
+       fprintf(resetshodeha,"%c",c);
+    }
+    
                     FILE* bash = fopen("bash.sh","w");
  fprintf(bash,"#!/bin/bash\nrm -r %s\nmv %s %s",addres,addres2,addres);
  fclose(bash);
@@ -589,7 +646,7 @@ stat(dastoor2,&st);
        file_addha_reset(address2,dastoor2j);
        if(!( S_ISDIR(st.st_mode))){
  FILE* bash = fopen("bash.sh","w");
- fprintf(bash,"#!/bin/bash\nrm %s/%s ",addres,dastoor2j);
+ fprintf(bash,"#!/bin/bash\nmv %s/%s %s/resetshode",addres,dastoor2j,dotGitYab());
  fclose(bash);
  system("./bash.sh");
  system("rm bash.sh");
@@ -613,6 +670,11 @@ stat(dastoor2,&st);
        }
 }
 void file_addha_reset(char addres[100],char name[100]){
+    char add_resetshode[300];
+    sprintf(add_resetshode,"%s/resetshode.txt",dotGitYab());
+    FILE* resetshodeha =fopen(add_resetshode,"a");
+    fprintf(resetshodeha,"%s\n",name);
+    fclose(resetshodeha);
     FILE* addha=fopen(addres,"r");
     char c;
     char addshode[100];
@@ -637,7 +699,7 @@ void file_addha_reset(char addres[100],char name[100]){
     strcpy(addres3,addres);
     strcat(addres3,"1");
    FILE* addha1=fopen(addres3,"a");
-    for (int j = 0; j < i; j++)
+    for (int j = 0; j < i-1; j++)
 {
         fprintf(addha1,"%s\n",addhajadid[j]);
         // printf("%s",addhajadid[j]);
@@ -654,6 +716,11 @@ void file_addha_reset(char addres[100],char name[100]){
 void commit_ghabli_biar(int sh_commit);
 int file_yab(char* file_name);
 void commit(char** dastooorat,int tedad_kalame){
+    char *addres5 = dotGitYab();
+            if (strcmp(addres5, "?") == 0){
+            printf("fatal: not in a gitman directory\n");
+            return;
+        }
     char add_head[100];
     strcpy(add_head,dotGitYab());
     strcat(add_head,"/head.txt");
@@ -707,7 +774,7 @@ struct dirent* staged;
     strcat(address_short,"/shortcut.txt");
     FILE* short_file =fopen(address_short,"r");
     if (short_file==NULL){
-        printf("shortcut doesn't exist");
+        printf("shortcut doesn't exist\n");
         return;
     }
 
@@ -743,7 +810,8 @@ struct dirent* staged;
     strcpy(dastooorat[2],"-m");
   }
   else 
-          printf("shortcut doesn't exist");
+          printf("shortcut doesn't exist\n");
+          return;
  }
  else if (strcmp(dastooorat[2],"-m")!=0){
     printf("command not found\n");
@@ -864,6 +932,11 @@ return 1;
 }
 
 void set(char** dastooorat,int tedad_kalame){
+    char *addres5 = dotGitYab();
+            if (strcmp(addres5, "?") == 0){
+            printf("fatal: not in a gitman directory\n");
+            return;
+        }
   if (strcmp(dastooorat[2],"-m")!=0){
     printf("command not found\n");
     return;
@@ -881,13 +954,18 @@ void set(char** dastooorat,int tedad_kalame){
 }
 
 void replace(char** dastooorat,int tedad_kalame,int rem_or_rep){
+    char *addres5 = dotGitYab();
+            if (strcmp(addres5, "?") == 0){
+            printf("fatal: not in a gitman directory\n");
+            return;
+        }
    char old_address_short[100];
     strcpy(old_address_short,dotGitYab());
   strcat(old_address_short,"/shortcut.txt");
 FILE* old_short = fopen(old_address_short,"r");
 if (old_short==NULL)
 {
-printf("shortcut doesn't exist");
+printf("shortcut doesn't exist\n");
         return;
         }
 char new_address_short[150];
@@ -904,10 +982,12 @@ while (c!=EOF)
 }
 rewind(old_short);
 char shortcut[100];
+int parcham=0;
 for (int i = 0; i < n_newlin; i++)
 {
     fgets(shortcut,99,old_short);
     if((strncmp(dastooorat[5],shortcut,strlen(dastooorat[5]))==0)){
+        parcham=1;
         char shortcut_name[40];
         char shortcut_mes[100];
     sscanf(shortcut,"%s : %s",shortcut_name,shortcut_mes);
@@ -919,9 +999,15 @@ for (int i = 0; i < n_newlin; i++)
     fprintf(new_short,"%s : \"%s\"\n",shortcut_name,dastooorat[3]);
     continue;
     }
-    if(strncmp(dastooorat[3],shortcut,strlen(dastooorat[3]))==0)
+    if(strncmp(dastooorat[3],shortcut,strlen(dastooorat[3]))==0){
+    parcham=1;
     continue;
+    }
     fprintf(new_short,"%s",shortcut);
+}
+if(parcham==0){
+printf("shortcut doesn't exist\n");
+return;
 }
 char command[500];
 sprintf(command,"rm %s",old_address_short);
@@ -937,6 +1023,11 @@ system(command);
   int zoodtaryab(char* zaman_aval,char*zaman_dovom);
   int time_com(char* time_hadaf,int n,FILE* cominfo_file);
  void logcom(char** dastooorat,int tedad_kalame){
+    char *addres5 = dotGitYab();
+            if (strcmp(addres5, "?") == 0){
+            printf("fatal: not in a gitman directory\n");
+            return;
+        }
 char address_cominfo[100];
 strcpy(address_cominfo,dotGitYab());
 strcat(address_cominfo,"/commit_info.txt");
@@ -971,7 +1062,12 @@ else if ((tedad_kalame==4)&&(strcmp(dastooorat[2],"-branch")==0))
 }
 else if ((tedad_kalame>=4)&&(strcmp(dastooorat[2],"-search")==0))
 {
- ted_com = austhor_yab(dastooorat[3],n+500,sh_commit_ok,cominfo_file);
+    ted_com=0;
+    for (int i = 0; i <tedad_kalame-3 ; i++)
+    {
+ ted_com+= austhor_yab(dastooorat[i+3],n+500,sh_commit_ok,cominfo_file);
+    }
+    
  if (ted_com==0)
     printf("the word doesn't exist\n");
     return;
@@ -1231,6 +1327,11 @@ return ted;
 //branch===================================================================
 void branch_chap(char add_branch_name[100]);
 void branch(char** dastooorat,int tedad_kalame){
+    char *addres5 = dotGitYab();
+            if (strcmp(addres5, "?") == 0){
+            printf("fatal: not in a gitman directory\n");
+            return;
+        }
 char add_branch_name[100];
 strcpy(add_branch_name,dotGitYab());
 strcat(add_branch_name,"/branches.txt");
@@ -1309,6 +1410,11 @@ printf("%s\n",b_name);
 //checkout====================================================================
 int check_taqir();
 void checkout(char** dastooorat,int tedad_kalame){
+    char *addres5 = dotGitYab();
+            if (strcmp(addres5, "?") == 0){
+            printf("fatal: not in a gitman directory\n");
+            return;
+        }
     char hal_bra[100];
 FILE* branch_hal_file =fopen(".gitman/branch_hal.txt","r");
 fscanf(branch_hal_file,"%s",hal_bra);
@@ -1547,6 +1653,11 @@ return 0;
 //tahcheckout====================================================================
 //status==================================================================
 void status(char** dastoorat,int tedad_kalame){
+    char *addres5 = dotGitYab();
+            if (strcmp(addres5, "?") == 0){
+            printf("fatal: not in a gitman directory\n");
+            return;
+        }
     system("mv .gitman/addha.txt .gitman/addha1.txt");
     system("mv .gitman/staged .gitman/staged1");
     char** aldastoorat;
@@ -1600,9 +1711,10 @@ while ((fileha_branch = readdir(branch_folder)) != NULL) {
         // strcpy(direntrry[j],entry->d_name);
         if (strncmp(fileha_branch->d_name, ".",1) == 0 || strcmp(fileha_branch->d_name, "..") == 0) 
             continue;
+            if(access(fileha_branch->d_name,F_OK)!=0)
+            continue;
 struct stat entryha;
 stat(fileha_branch->d_name,&entryha);
-printf("%s  ",fileha_branch->d_name);
 //=====
 // time_t rawtime;
    struct tm *info;
@@ -1613,6 +1725,7 @@ printf("%s  ",fileha_branch->d_name);
 int a=zoodtaryab(buffer,zaman_akhcom_bra);
       if(a==2)   
       continue;
+printf("%s  ",fileha_branch->d_name);
     char nextLine;
   int l=0;
   char c;
@@ -1650,11 +1763,11 @@ FILE* addhaFile=fopen(addresaddha,"r");
  char add_file_incom[500];
  sprintf(add_file_incom,".gitman/commitha/commit%d/%s",sh_akhcom_bra,fileha_branch->d_name);
       if(access(add_file_incom,F_OK)!=0){
-      printf("A");
+      printf("A\n");
       }
       else
-      printf("M");
-    printf("%s   %s\n",buffer,buffer1);
+      printf("M\n");
+    // printf("%s   %s\n",buffer,buffer1);
 
 }
 //check delete
@@ -1757,7 +1870,6 @@ int wildkart(char* dastoor2,int tedWildcart,char direntrry[20][20],int j,int shd
     strcpy(zapas,dastoor2);
     if (strcmp(dastoor2,"*")==0)
     {
-        printf("1111");
         for (int i = 0; i < j; i++)
             shdorosta[i]=i;
         
@@ -1808,7 +1920,6 @@ if(dastoor2[strlen(dastoor2)-1]!='*'){
         if(parcham==0){
 shdorosta[o]=i;
 o++;
-        printf("%s",direntrry[i]);
         }
         
     }
