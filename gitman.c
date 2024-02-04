@@ -1646,13 +1646,68 @@ FILE* addhaFile=fopen(addresaddha,"r");
    info1 = localtime( &entryha.st_ctime );
       strftime(buffer1,80,"%Y/%m/%d %X", info1);
  a=zoodtaryab(buffer1,zaman_akhcom_bra);
-      if(a==2)
-      printf("AAAA");
-
+ //  check add
+ char add_file_incom[500];
+ sprintf(add_file_incom,".gitman/commitha/commit%d/%s",sh_akhcom_bra,fileha_branch->d_name);
+      if(access(add_file_incom,F_OK)!=0){
+      printf("A");
+      }
+      else
+      printf("M");
     printf("%s   %s\n",buffer,buffer1);
 
 }
+//check delete
+char add_commit_folder[100];
+sprintf(add_commit_folder,".gitman/commitha/commit%d",sh_akhcom_bra);
+DIR* commit_folder;
+commit_folder= opendir(add_commit_folder);
+struct dirent* fileha_commit;
+while ((fileha_commit = readdir(commit_folder)) != NULL) {
+        // strcpy(direntrry[j],entry->d_name);
+         char add_file_incom[500];
+ sprintf(add_file_incom,".gitman/staged/%s",fileha_commit->d_name);
+      if(access(add_file_incom,F_OK)!=0){
+        printf("%s  ",fileha_commit->d_name);
+      }
+      else
+      continue;
+        if (strncmp(fileha_commit->d_name, ".",1) == 0 || strcmp(fileha_commit->d_name, "..") == 0) 
+            continue;
+struct stat entryha_commit;
+stat(fileha_commit->d_name,&entryha_commit);
 
+    char nextLine;
+  int l=0;
+  char c;
+char addresaddha[100];
+strcpy(addresaddha,".gitman/addha1.txt");
+    char addha[100];
+FILE* addhaFile=fopen(addresaddha,"r");
+    int parcham=0;
+    do
+    {
+        fscanf(addhaFile,"%s",addha);
+        c=fgetc(addhaFile);
+        if (strcmp(addha,fileha_commit->d_name)==0)
+        {
+            printf("+");
+            parcham=1;
+            break;
+        }
+        
+        
+    } while (c=='\n');
+    if (parcham==0)
+    printf("-");
+    
+    rewind(addhaFile);
+
+      printf("D\n");
+
+
+}
+//======================
 system("rm -r .gitman/staged");
 system("rm -r .gitman/addha.txt");
   system("mv .gitman/addha1.txt .gitman/addha.txt ");
