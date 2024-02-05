@@ -1981,5 +1981,4 @@ int main(int tedad_kalame, char **dastoorat)
     else if (strcmp("checkout", dastoorat[1]) == 0)
     checkout(dastoorat, tedad_kalame);
     return 0;
-    
 }
