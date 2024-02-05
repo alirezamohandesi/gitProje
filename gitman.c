@@ -869,6 +869,8 @@ fclose(com_info);
 //   printf("%s", command);
     system(command);
   commit_ghabli_biar(m+1);
+  if(access("1.txt",F_OK)==0)
+  system("rm 1.txt");
     sprintf(command,"mv %s/* %s/commit%d",address_staged,address_commit,m+1);
     system(command);
      FILE* a= fopen(address_addha,"w");
@@ -905,7 +907,7 @@ while ((fileha_akhcom = readdir(akhcom)) != NULL) {
        int vogood = file_yab(fileha_akhcom->d_name);
        if(vogood==1){
         char command[500];
-        sprintf(command,"cp %s/%s %s",add_akhcom,fileha_akhcom->d_name,add_jadcom);
+        sprintf(command,"cp -r %s/%s %s",add_akhcom,fileha_akhcom->d_name,add_jadcom);
         system(command);
        }
     }
@@ -1357,6 +1359,7 @@ c=fgetc(branch_name_file);
 if(c==EOF)
 break;
 }
+if(branch_name_file!=NULL)
 fclose(branch_name_file);
 
     branch_name_file = fopen(add_branch_name,"a");
@@ -1388,9 +1391,10 @@ void branch_chap(char add_branch_name[100]){
 FILE* branches =fopen(add_branch_name,"r");
 if (branches==NULL)
 {
-printf("There are no branches\n");
+printf("master\n");
 return;
 }
+printf("master\n");
 char b_name[100];
 char c;
 while (b_name[0]!=EOF)
@@ -1433,7 +1437,7 @@ printf("please commit your changes\n");
 return;
 }
 
-if(isdigit( dastooorat[2][0])){
+if((isdigit( dastooorat[2][0]))||(strncmp(dastooorat[2],"HEAD-",5)==0)){
     //پیدا کردن هد
         char hal_bra[100];
     int sh_akhcom;
@@ -1461,6 +1465,19 @@ if (strcmp(alak,hal_bra)==0){
 }
 fgets(alak,199,cominfo_file);
 }
+  if (strncmp(dastooorat[2],"HEAD-",5)==0)
+    {
+        char x[10];
+        sprintf(x,"%c",dastooorat[2][5]);
+        strcpy(dastooorat[2],x);
+    }
+    if (sh_akhcom<(int)(dastooorat[2][0]-48))
+    {
+        printf("the commit doesn't exist");
+        return;
+    }
+    
+
 FILE* file = fopen(".gitman/head.txt","w");
 fprintf(file,"%d\n",sh_akhcom_bra);
 fclose(file);
@@ -1484,6 +1501,15 @@ char command[150];
 }
 
 else{
+    char dir_branch_jad[100];
+    strcpy(dir_branch_jad,".git_branch_");
+    strcat(dir_branch_jad,dastooorat[2]);
+    if (access(dir_branch_jad,F_OK)!=0)
+    {
+        printf("the branch doesn't exist");
+        return;
+    }
+    
     char command[150];
     char dir_branch_hal[100];
     strcpy(dir_branch_hal,".git_branch_");
@@ -1517,9 +1543,7 @@ time_t rawtime;
 // fprintf(f,"%s",buffer);
 // fclose(f);
         //rikhtan file haye bra jadid
-        char dir_branch_jad[100];
-    strcpy(dir_branch_jad,".git_branch_");
-    strcat(dir_branch_jad,dastooorat[2]);
+        
         sprintf(command,"cp -r %s/[!.]* .",dir_branch_jad);
         system(command);
 
