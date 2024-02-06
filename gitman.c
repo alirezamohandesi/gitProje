@@ -2131,23 +2131,25 @@ void show_tag(char* tag_name){
     }
     rewind(tag_file);
 char alak[200];
-
+char felan[100];
     for (int i = 0; i < n; i++)            
             {
                 strcpy(alak," ");
-            fscanf(tag_file,"tag_name: %s\n",alak);
-            if((strcmp(alak,tag_name)==0)){
-                printf("yes\n");
+            fgets(alak,199,tag_file);
+            sscanf(alak,"tag_name: %s\n",felan);
+            if((strcmp(felan,tag_name)==0)){
+            //    printf("%s\n",felan);
+                // printf("yes\n");
                 break;
             }
             if(i==n-1)
+            return;         
             fgets(alak,199,tag_file);
             fgets(alak,199,tag_file);
             fgets(alak,199,tag_file);
             fgets(alak,199,tag_file);
             fgets(alak,199,tag_file);           
             fgets(alak,199,tag_file);  
-            return;         
             }
 printf("tag_name: %s\n",tag_name);
 // printf("%s",tag_name);
@@ -2221,9 +2223,14 @@ aldastoorat=malloc(100*sizeof(int*));
     FILE* a= fopen(".gitman/branch_hal.txt","w");
     fprintf(a,"%s",dastoorat[3]);
     fclose(a);
+    char sh_akhcom2[20];
+    FILE* file_akhcom1= fopen(".gitman/sh_akhcom.txt","r");
+fscanf(file_akhcom1,"%s", sh_akhcom2);
+fclose(file_akhcom1);
 commit(aldastoorat,4);
 strcpy(aldastoorat[1],"checkout");
-sprintf(aldastoorat[2],"%d",sh_akhcom);
+strcpy(aldastoorat[2],sh_akhcom2);
+// printf("%d",sh_akhcom);
 checkout(aldastoorat,503);
 }
 //omoomy portekrar===================================================================
