@@ -814,7 +814,7 @@ struct dirent* staged;
           return;
  }
  else if (strcmp(dastooorat[2],"-m")!=0){
-    printf("command not found\n");
+    printf("command not found1\n");
     return;
   }
    else if (dastooorat[3]==NULL){
@@ -1414,6 +1414,12 @@ printf("%s\n",b_name);
 //checkout====================================================================
 int check_taqir();
 void checkout(char** dastooorat,int tedad_kalame){
+    int revert=0;
+    if(tedad_kalame>500){
+    tedad_kalame-=500;
+    revert=1;
+    dastooorat[2][0]++;
+    }
     char *addres5 = dotGitYab();
             if (strcmp(addres5, "?") == 0){
             printf("fatal: not in a gitman directory\n");
@@ -1430,7 +1436,9 @@ strcpy(dastooorat[2],hal_bra);
 system("rm .gitman/head.txt");
 head_par =1;
 }
-
+else if(revert==1){
+    
+}
 else if (check==0)
 {
 printf("please commit your changes\n");
@@ -1476,13 +1484,13 @@ fgets(alak,199,cominfo_file);
         printf("the commit doesn't exist");
         return;
     }
-    
-
+    char command[150];
+if(revert==0){
 FILE* file = fopen(".gitman/head.txt","w");
 fprintf(file,"%d\n",sh_akhcom_bra);
 fclose(file);
 //پاک کردن هد و ریختن فایلای فعلی توش و پاک کردن محل کار
-char command[150];
+
     char dir_commit_hal[100];
     sprintf(dir_commit_hal,".gitman/commitha/commit%d",sh_akhcom_bra);
     sprintf(command,"rm -r %s",dir_commit_hal);
@@ -1492,6 +1500,7 @@ char command[150];
         system(command);
         sprintf(command,"mv [!.]* %s",dir_commit_hal);
         system(command);
+}
         //ریختن فایل های کامیته در اینجا
         char dir_commit_jad[100];
             sprintf(dir_commit_jad,".gitman/commitha/commit%s",dastooorat[2]);
@@ -1674,7 +1683,6 @@ return 0;
     }
     return 1;
 }
-//tahcheckout====================================================================
 //status==================================================================
 void status(char** dastoorat,int tedad_kalame){
     char *addres5 = dotGitYab();
@@ -1850,8 +1858,376 @@ system("rm -r .gitman/addha.txt");
   system("mv .gitman/addha1.txt .gitman/addha.txt ");
     system("mv .gitman/staged1 .gitman/staged ");
 }
-//tahstatus==================================================================
+//revert======================================================================
+void revert(char** dastoorat,int tedad_kalame){
+            FILE* file_akhcom= fopen(".gitman/sh_akhcom.txt","r");
+                    char sh_akhcom[20];
+fscanf(file_akhcom,"%s", sh_akhcom);
+fclose(file_akhcom);
+    char *addres5 = dotGitYab();
+            if (strcmp(addres5, "?") == 0){
+            printf("fatal: not in a gitman directory\n");
+            return;
+        }
+            if(strcmp(dastoorat[2],"-n")==0){
+                system("rm -r [!.]*");
+        if(tedad_kalame==4){
+            dastoorat[3][0]--;
+            strcpy(dastoorat[2],dastoorat[3]);
+            checkout(dastoorat,503);
+        }
+        else{
+            strcpy(dastoorat[2],sh_akhcom);
+            dastoorat[2][0]--;
+            checkout(dastoorat,503);
+        }
+        return;
+    }
+    int message=0;
+            char payam[100];
+                    char alak[200];
+    if(strcmp(dastoorat[2],"-m")==0){
+    message =2;
+    if(strncmp(dastoorat[2+message],"HEAD-",5)==0){
+            sprintf(dastoorat[2+message],"%c",sh_akhcom[0]-dastoorat[2+message][5]+48);
+        }
+    }
+    else{
+        if(strncmp(dastoorat[2+message],"HEAD-",5)==0){
+            sprintf(dastoorat[2],"%c",sh_akhcom[0]-dastoorat[2][5]+48);
+        }
+        FILE* com_info =fopen(".gitman/commit_info.txt","r");
+        char c;
+        for (int i = 0; i < (int)(dastoorat[2][0]-48)-1; )
+        {
+          c=  fgetc(com_info);
+          if(c=='@')
+          i++;
+        }
+        fgetc(com_info);
+        fscanf(com_info,"payam: \"%[^\"]\"\n",payam);
+        fgets(alak,199,com_info);
+fgets(alak,199,com_info);
+fgets(alak,199,com_info);
+fgets(alak,199,com_info);
+fgets(alak,199,com_info);
+fgets(alak,199,com_info);
+fgets(alak,199,com_info);
+fclose(com_info);
+sprintf(alak,"%s",payam);
+    }
+
+    if((isdigit(dastoorat[2+message][0]))||(strncmp(dastoorat[2+message],"HEAD-",5)==0)){
+        char command[500];
+        system("rm -r [!.]*");
+        sprintf(command,"cp -r .gitman/commitha/commit%s/* .gitman/staged",dastoorat[2+message]);
+        system(command);
+        char** aldastoorat;
+    aldastoorat=malloc(100*sizeof(int*));
+    for (int i = 0; i < 100; i++)
+    aldastoorat[i]=malloc(100);
+    strcpy(aldastoorat[2],"-m");
+    strcpy(aldastoorat[1],"commit");
+    if(message)
+    strcpy(aldastoorat[3],dastoorat[3]);
+    else
+        strcpy(aldastoorat[3],alak);
+    printf("%s %s %s",aldastoorat[1],aldastoorat[2],aldastoorat[3]);
+        commit(aldastoorat,4);
+        strcpy(aldastoorat[2],sh_akhcom);
+        // strcat(aldastoorat[2],sh_akhcom);
+        checkout(aldastoorat,503);
+
+    }
+
+    
+}
+//tag============================================================================
+void show_tag(char* tag_name);
+void tag_chap();
+void tag(char** dastoorat,int tedad_kalame){
+    if(tedad_kalame==2){
+    tag_chap();
+    return;
+    }
+    if(strcmp(dastoorat[2],"show")==0){
+    show_tag(dastoorat[3]);
+        return;
+    }
+    int baznev =0;
+                int n;
+        char tagname[100];
+        char tag_mes[100];
+       char tag_com_id[100];
+       strcpy(tag_com_id,"0");
+       strcpy(tag_mes," ");
+
+        strcpy(tagname,dastoorat[3]);
+
+if((tedad_kalame>4)&&(strcmp(dastoorat[4],"-m")==0))
+                strcpy(tag_mes,dastoorat[5]);
+
+ if((tedad_kalame>4)&&(strcmp(dastoorat[4],"-c")==0))
+                strcpy(tag_com_id,dastoorat[5]);
+
+ if((tedad_kalame>6)&&(strcmp(dastoorat[6],"-c")==0))
+                strcpy(tag_com_id,dastoorat[7]);
+
+if ((tedad_kalame>4)&&(strcmp(dastoorat[4],"-f")==0))
+baznev =1;
+
+ if((tedad_kalame>6)&&(strcmp(dastoorat[6],"-f")==0))
+            baznev =1;
+
+ if((tedad_kalame>8)&&(strcmp(dastoorat[8],"-f")==0)&&(tedad_kalame>8))
+            baznev =1;
+
+            baznev =0;
+        FILE* tagha =fopen(".gitman/tag.txt","r");
+        if(tagha!=NULL){
+            char c;
+            char alak[100];
+            while (c!=EOF)
+            {
+                c=fgetc(tagha);
+                if(c=='@')
+                n++;
+            } 
+                rewind(tagha);
+            for (int i = 0; i < n; i++)            
+            {
+            fscanf(tagha,"tag_name: %s\n",alak);
+            if((strcmp(alak,tagname)==0)&&(baznev==0)){
+                printf("the tag already exist\n");
+                return;
+            }
+else if(strcmp(alak,tagname)==0)
+{
+    baznev=i+2;
+    break;
+}
+            fgets(alak,99,tagha);
+            fgets(alak,99,tagha);
+            fgets(alak,99,tagha);
+            fgets(alak,99,tagha);
+            fgets(alak,99,tagha);
+            fgets(alak,99,tagha);           
+            }
+        }
+        if (strcmp(tag_com_id,"0")==0)
+        {
+FILE* file_akhcom= fopen(".gitman/sh_akhcom.txt","r");
+fscanf(file_akhcom,"%s", tag_com_id);
+fclose(file_akhcom);
+// fclose(tagha);
+        }
+//چاپ تگ
+baznev=0;
+if(baznev>1){
+    FILE* tagghadim =fopen(".gitman/tag.txt","r");
+    FILE* tagjad =fopen(".gitman/tag.txt1","a");
+    char trans[100];
+    for (int i = 0; i < n; i++)
+    {
+        if(i==baznev-2)
+        continue;
+        fgets(trans,99,tagghadim);
+        fprintf(tagjad,"%s\n",trans);
+        fgets(trans,99,tagghadim);
+fprintf(tagjad,"%s\n",trans);
+        fgets(trans,99,tagghadim);
+        fprintf(tagjad,"%s\n",trans);
+        fgets(trans,99,tagghadim);
+        fprintf(tagjad,"%s\n",trans);
+        fgets(trans,99,tagghadim);
+        fprintf(tagjad,"%s\n",trans);
+        fgets(trans,99,tagghadim);
+        fprintf(tagjad,"%s\n",trans);
+        fgets(trans,99,tagghadim);
+        fprintf(tagjad,"%s\n",trans);
+    }
+    fclose(tagghadim);
+    fclose(tagjad);
+system("rm .gitman/tag.txt");
+system("mv .gitman/tag.txt1 .gitman/tag.txt");
+}
+
+time_t rawtime;
+   struct tm *info;
+   char buffer[80];
+   time(&rawtime);
+   info = localtime( &rawtime );
+   strftime(buffer,80,"%Y/%m/%d %X", info);
+
+char name[30];
+  char email[30];
+  int parcham =configyab(name,email);
+     if (parcham==0)
+{
+    printf("please config\n");
+    return;
+}
+
+tagha =fopen(".gitman/tag.txt","a");
+fprintf(tagha,"tag_name: %s\ncommit_ID: %s\nwriter: %s\nemail: %s\ndate: \"%s\"\nmessage: \"%s\"\n@\n",tagname,tag_com_id,name,email,buffer,tag_mes);
+
+}
+
+void tag_chap(){
+            FILE* tagha =fopen(".gitman/tag.txt","r");
+            int n;
+            char tagname[100];
+            char nameha[100][100];
+     char c;
+            char alak[100];
+            while (c!=EOF)
+            {
+                c=fgetc(tagha);
+                if(c=='@')
+                n++;
+            } 
+                rewind(tagha);
+            for (int i = 0; i < n; i++)            
+            {
+            fscanf(tagha,"tag_name: %s\n",alak);
+            strcpy(nameha[i],alak);
+            fgets(alak,99,tagha);
+            fgets(alak,99,tagha);
+            fgets(alak,99,tagha);
+            fgets(alak,99,tagha);
+            fgets(alak,99,tagha);
+            fgets(alak,99,tagha);           
+            }
+            int i;
+            int j;
+            char s[100];
+            for(i=0;i<n;i++){
+      for(j=i+1;j<n;j++){
+         if(strcmp(nameha[i],nameha[j])>0){
+            strcpy(s,nameha[i]);
+            strcpy(nameha[i],nameha[j]);
+            strcpy(nameha[j],s);
+         }
+      }
+   }
+   for (int i = 0; i < n; i++)
+   {
+    printf("\n");
+    show_tag(nameha[i]);
+   }
+   fclose(tagha);
+}
+
+
+void show_tag(char* tag_name){
+    FILE* tag_file=fopen(".gitman/tag.txt","r");
+    char c=' ';
+    int n;
+    while (c!=EOF)
+    {
+        c=fgetc(tag_file);
+        if(c=='@')
+        n++;
+    }
+    rewind(tag_file);
+char alak[200];
+
+    for (int i = 0; i < n; i++)            
+            {
+                strcpy(alak," ");
+            fscanf(tag_file,"tag_name: %s\n",alak);
+            if((strcmp(alak,tag_name)==0)){
+                printf("yes\n");
+                break;
+            }
+            if(i==n-1)
+            fgets(alak,199,tag_file);
+            fgets(alak,199,tag_file);
+            fgets(alak,199,tag_file);
+            fgets(alak,199,tag_file);
+            fgets(alak,199,tag_file);           
+            fgets(alak,199,tag_file);  
+            return;         
+            }
+printf("tag_name: %s\n",tag_name);
+// printf("%s",tag_name);
+           while (c!='@')
+           {
+            c=fgetc(tag_file);
+            printf("%c",c);
+           }
+           fclose(tag_file);
+           
+}
+//merg==========================================================================
+void merge(char** dastoorat,int tedad_kalame){
+char hal_bra[100];
+    int sh_akhcom;
+    FILE* branch_hal_file =fopen(".gitman/branch_hal.txt","r");
+fscanf(branch_hal_file,"%s",hal_bra);
+fclose(branch_hal_file);
+FILE* file_akhcom= fopen(".gitman/sh_akhcom.txt","r");
+fscanf(file_akhcom,"%d", &sh_akhcom);
+fclose(file_akhcom);
+char alak[300];
+int sh_akhcom_bra;
+FILE* cominfo_file = fopen(".gitman/commit_info.txt","r");
+for (int i = 0; i < sh_akhcom; i++)
+{
+    fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fscanf(cominfo_file,"branch: %s\n",alak);
+// printf("%s",alak);
+if (strcmp(alak,dastoorat[3])==0){
+    sh_akhcom_bra=i+1;
+}
+fgets(alak,199,cominfo_file);
+}
+rewind(cominfo_file);
+int sh_ber_mer=0;
+for (int i = 0; i < sh_akhcom; i++)
+{
+    fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fgets(alak,199,cominfo_file);
+fscanf(cominfo_file,"branch: %s\n",alak);
+printf("%s\n",alak);
+if (strcmp(alak,dastoorat[4])==0){
+    sh_ber_mer=i+1;
+}
+fgets(alak,199,cominfo_file);
+}
+
+char command[200];
+sprintf(command,"cp -r .gitman/commitha/commit%d/* .gitman/staged ",sh_akhcom_bra);
+system(command);
+sprintf(command,"cp -r .gitman/commitha/commit%d/* .gitman/staged ",sh_ber_mer);
+system(command);
+char** aldastoorat;
+aldastoorat=malloc(100*sizeof(int*));
+    for (int i = 0; i < 100; i++)
+    aldastoorat[i]=malloc(100);
+    strcpy(aldastoorat[2],"-m");
+    strcpy(aldastoorat[1],"commit");
+    sprintf(command,"Branches %s and %s were merged ",dastoorat[3],dastoorat[4]);
+    strcpy(aldastoorat[3],command);
+    FILE* a= fopen(".gitman/branch_hal.txt","w");
+    fprintf(a,"%s",dastoorat[3]);
+    fclose(a);
+commit(aldastoorat,4);
+strcpy(aldastoorat[1],"checkout");
+sprintf(aldastoorat[2],"%d",sh_akhcom);
+checkout(aldastoorat,503);
+}
 //omoomy portekrar===================================================================
+
 char *dotGitYab()
 {
     char *addres = malloc(100);
@@ -1980,5 +2356,11 @@ int main(int tedad_kalame, char **dastoorat)
     branch(dastoorat, tedad_kalame);
     else if (strcmp("checkout", dastoorat[1]) == 0)
     checkout(dastoorat, tedad_kalame);
+    else if (strcmp("revert", dastoorat[1]) == 0)
+    revert(dastoorat, tedad_kalame);
+    else if (strcmp("tag", dastoorat[1]) == 0)
+    tag(dastoorat, tedad_kalame);
+    else if (strcmp("merge", dastoorat[1]) == 0)
+    merge(dastoorat, tedad_kalame);
     return 0;
 }
