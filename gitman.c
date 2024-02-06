@@ -2233,6 +2233,50 @@ strcpy(aldastoorat[2],sh_akhcom2);
 // printf("%d",sh_akhcom);
 checkout(aldastoorat,503);
 }
+
+void grep(char** dastoorat,int tedad_kalame){
+    char sh_commit[4];
+    strcpy(sh_commit," ");
+    int ncheck=0;
+if((tedad_kalame>6)&&(strcmp(dastoorat[6],"-c")==0))
+strcpy(sh_commit,dastoorat[7]);
+if((tedad_kalame>6)&&(strcmp(dastoorat[6],"-n")==0))
+ncheck=1;
+if((tedad_kalame>8)&&(strcmp(dastoorat[8],"-n")==0))
+ncheck=1;
+FILE* file;
+char khat[200];
+if (strcmp(sh_commit,"-c")==0)
+{
+    char file_name[200];
+    sprintf(file_name,".gitman/commitha/commit%s",dastoorat[7]);
+   file = fopen(file_name,"r");
+}
+else{
+ file= fopen(dastoorat[3],"r");
+}
+int sh_kh=0;
+char* x;
+char* q;
+while (fgets(khat,190,file))
+{
+    sh_kh++;
+    if((x=strstr(khat,dastoorat[5]))!=0){
+if (ncheck)
+    printf("%d-",sh_kh);
+  int s=(int)(x-khat);
+    for (int i = 0; i < s; i++)
+    {
+        printf("%c",khat[i]);
+    }
+    printf("\033[0;31m%s",dastoorat[5]);
+
+printf("\033[0;37m%s",x+strlen(dastoorat[5]));
+
+    }
+}
+
+}
 //omoomy portekrar===================================================================
 
 char *dotGitYab()
@@ -2369,6 +2413,7 @@ int main(int tedad_kalame, char **dastoorat)
     tag(dastoorat, tedad_kalame);
     else if (strcmp("merge", dastoorat[1]) == 0)
     merge(dastoorat, tedad_kalame);
+     else if (strcmp("grep", dastoorat[1]) == 0)
+    grep(dastoorat, tedad_kalame);
     return 0;
-    
 }
