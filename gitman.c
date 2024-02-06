@@ -2370,4 +2370,5 @@ int main(int tedad_kalame, char **dastoorat)
     else if (strcmp("merge", dastoorat[1]) == 0)
     merge(dastoorat, tedad_kalame);
     return 0;
+    
 }
